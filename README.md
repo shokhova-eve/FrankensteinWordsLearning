@@ -1,4 +1,4 @@
-<img width="1080" height="694" alt="image" src="https://github.com/user-attachments/assets/6c4049f3-160e-4685-88a6-a83c528a2ee3" />
+<img width="1088" height="731" alt="image" src="https://github.com/user-attachments/assets/1f9bb623-4db1-40b4-91b8-a9a3026d13d1" />
 
 It is a project with the collection of words from Frankenstein. They are less popular and can help widen vocabulary for B2-C1 learners.
 
