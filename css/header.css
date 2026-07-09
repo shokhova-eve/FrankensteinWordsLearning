@@ -1,0 +1,32 @@
+header{
+  text-align: center;
+  padding-bottom: 22px;
+  margin-bottom: 28px;
+  border-bottom: 2px solid var(--ink);
+  position: relative;
+}
+header::after{
+  content:"";
+  position:absolute; left:0; right:0; bottom:-6px;
+  height:1px; background: var(--ink); opacity:0.5;
+}
+.kicker{
+  font-family:'Courier Prime', monospace;
+  font-size: 11px;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  color: var(--oxblood);
+  margin-bottom: 6px;
+}
+h1{
+  font-family:'Cormorant Garamond', serif;
+  font-weight: 700;
+  font-size: 42px;
+  margin: 0 0 6px;
+  letter-spacing: 0.5px;
+}
+.subtitle{
+  font-style: italic;
+  color: var(--ink-soft);
+  font-size: 16px;
+}

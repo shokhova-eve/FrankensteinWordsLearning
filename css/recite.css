@@ -1,0 +1,73 @@
+.specimen.recite-placeholder,
+.specimen.recite{
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 50vh;
+  max-width: 560px;
+  margin: 0 auto;
+  text-align: center;
+}
+
+.specimen.recite-placeholder{
+  font-style: italic;
+  color: var(--ink-soft);
+  border-left-color: var(--line);
+}
+
+.specimen-word.recite{
+  position: relative;
+  z-index: 1;
+  pointer-events: none;
+  font-size: 38px;
+}
+
+.recognized-btn,
+.unknown-btn{
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 50%;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  padding-bottom: 20px;
+  border: none;
+  cursor: pointer;
+  font-family: 'EB Garamond', serif;
+  font-size: 14.5px;
+  font-style: italic;
+  line-height: 1.5;
+  color: var(--ink-soft);
+  transition: background-color 0.15s;
+}
+
+.recognized-btn{
+  right: 0;
+  border-radius: 2px 0 0 2px;
+  background: rgba(255,255,255,0.35);
+}
+.recognized-btn:hover{ background: rgba(255,255,255,0.55); }
+
+.unknown-btn{
+  left: 0;
+  border-radius: 0 2px 2px 0;
+  background: rgba(43,36,25,0.12);
+}
+.unknown-btn:hover{ background: rgba(43,36,25,0.2); }
+
+.timer-track{
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 6px;
+  background: var(--line);
+}
+.timer-fill{
+  width: 100%;
+  height: 100%;
+  background: var(--oxblood);
+  transition: height 1s linear;
+}

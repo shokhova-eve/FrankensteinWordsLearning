@@ -1,0 +1,30 @@
+.pagination{
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  gap: 6px;
+  margin: 24px 0;
+  font-family:'Courier Prime', monospace;
+}
+.page-btn{
+  width: 30px; height: 30px;
+  border: 1px solid var(--line);
+  background: var(--paper-dark);
+  color: var(--ink-soft);
+  font-family:'Courier Prime', monospace;
+  font-size: 12px;
+  border-radius: 3px;
+  cursor: pointer;
+}
+.page-btn.active{
+  background: var(--ink);
+  color: var(--paper);
+  border-color: var(--ink);
+}
+.page-btn:disabled{
+  opacity: 0.35;
+  cursor: not-allowed;
+}
+.page-btn:hover:not(:disabled):not(.active){
+  border-color: var(--ink);
+}

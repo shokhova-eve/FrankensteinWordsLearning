@@ -1,0 +1,55 @@
+.compose-card{
+  background: var(--paper-dark);
+  border: 1px solid var(--line);
+  padding: 18px;
+  border-radius: 3px;
+  margin-bottom: 20px;
+}
+.compose-card textarea{
+  width: 100%;
+  min-height: 140px;
+  font-family: 'EB Garamond', serif;
+  font-size: 17px;
+  line-height: 1.6;
+  padding: 12px;
+  border: 1px solid var(--line);
+  border-radius: 3px;
+  background: rgba(255,255,255,0.5);
+  color: var(--ink);
+  resize: vertical;
+}
+.compose-card input[type=text]{
+  width: 100%;
+  font-family:'Cormorant Garamond', serif;
+  font-weight: 600;
+  font-size: 18px;
+  padding: 8px 4px;
+  border: none;
+  border-bottom: 1px solid var(--line);
+  background: transparent;
+  color: var(--ink);
+  margin-bottom: 12px;
+}
+.compose-card input[type=text]:focus{ outline:none; border-bottom-color: var(--oxblood); }
+.roll-row{
+  display:flex; justify-content:space-between; align-items:center;
+  margin-bottom: 10px; flex-wrap: wrap; gap: 8px;
+}
+.roll-words{
+  font-family:'Courier Prime', monospace;
+  font-size: 12px;
+  color: var(--verdigris-dark);
+}
+.roll-words b{ color: var(--oxblood); }
+.roll-btn{
+  font-family:'Courier Prime', monospace;
+  font-size: 11px;
+  letter-spacing: 0.5px;
+  padding: 6px 12px;
+  background: var(--verdigris);
+  color: var(--paper);
+  border: none;
+  border-radius: 3px;
+  cursor: pointer;
+}
+.roll-btn:hover{ background: var(--verdigris-dark); }

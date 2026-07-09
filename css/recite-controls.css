@@ -1,0 +1,48 @@
+.recite-controls{
+	display:flex;
+  	justify-content: space-between;
+  	align-items: center;
+  	gap: 12px;
+  	margin-bottom: 16px;
+  	flex-wrap: wrap;
+}
+.timer-group{
+	display:flex;
+  	gap: 6px;
+}
+.timer{
+	background: var(--paper-dark);
+	border: 1px solid var(--line);
+  	border-radius: 20px;
+  	color: var(--ink-soft);
+  	cursor: pointer;
+	display: flex;
+	font-family:'Courier Prime', monospace;
+	font-size: 12px;
+	align-items: center;
+	padding: 4px;
+	gap: 2px;
+}
+.timer-symbol{
+	position: relative;
+	bottom: 1px;
+}
+.timer.active{
+  background: var(--ink);
+  color: var(--paper);
+  border-color: var(--ink);
+}
+.start-btn{
+  font-family:'Courier Prime', monospace;
+  font-size: 12px;
+  letter-spacing: 0.5px;
+  padding: 8px 16px;
+  background: var(--oxblood);
+  color: var(--paper);
+  border: none;
+  border-radius: 3px;
+  cursor: pointer;
+  text-transform: uppercase;
+}
+.start-btn:hover { background: var(--oxblood-dark); }
+.start-btn:disabled { background: var(--oxblood-dark); }

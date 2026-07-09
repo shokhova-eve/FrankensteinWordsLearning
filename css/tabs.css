@@ -1,0 +1,31 @@
+.tabs{
+  display:flex;
+  gap: 4px;
+  margin: 30px 0 18px;
+  scroll-margin-top: 10vh;
+  border-bottom: 1px solid var(--line);
+}
+.tab{
+  font-family:'Courier Prime', monospace;
+  font-size: 12px;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  padding: 10px 16px;
+  cursor: pointer;
+  background: none;
+  border: none;
+  color: var(--ink-soft);
+  border-bottom: 2px solid transparent;
+  margin-bottom: -1px;
+  transition: color 0.15s;
+}
+.tab:hover{ color: var(--ink); }
+.tab.active{
+  color: var(--oxblood);
+  border-bottom: 2px solid var(--oxblood);
+  font-weight: 700;
+}
+.tab:focus-visible{ outline: 2px solid var(--oxblood); outline-offset: 2px; }
+
+.panel{ display:none; }
+.panel.active{ display:block; }

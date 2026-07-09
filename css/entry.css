@@ -1,0 +1,27 @@
+.entry{
+  background: var(--paper-dark);
+  border: 1px solid var(--line);
+  border-left: 3px solid var(--oxblood);
+  padding: 14px 18px;
+  margin-bottom: 12px;
+  border-radius: 2px;
+}
+.entry-head{
+  display:flex; justify-content:space-between; align-items:baseline;
+  margin-bottom: 6px; gap: 10px;
+}
+.entry-title{
+  font-family:'Cormorant Garamond', serif;
+  font-weight: 700;
+  font-size: 19px;
+}
+.entry-date{
+  font-family:'Courier Prime', monospace;
+  font-size: 10px;
+  color: var(--ink-soft);
+  white-space: nowrap;
+}
+.entry-body{
+  line-height: 1.6;
+  white-space: pre-wrap;
+}

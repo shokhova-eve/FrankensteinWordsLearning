@@ -1,0 +1,23 @@
+.search-wrapper{
+	background: var(--paper-dark);
+	border: none;
+	border-bottom: 1px solid var(--line);
+	display: flex;
+	font-size: 11px;
+	align-items: center;
+	padding: 4px;
+	gap: 2px;
+}
+.search-symbol{
+	position: relative;
+	bottom: 1px;
+}
+.search-input{
+	font-family:'Courier Prime', monospace;
+  	font-size: 11px;
+  	letter-spacing: 0.5px;
+	background: var(--paper-dark);
+	border: none;
+	outline: none;
+	flex: 1;
+}

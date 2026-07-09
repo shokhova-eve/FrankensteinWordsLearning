@@ -1,0 +1,16 @@
+{
+  "name": "frankenstein-vocab-journal",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Specimen Journal — a vocabulary and composition tracker backed by SQLite",
+  "main": "server/server.js",
+  "scripts": {
+    "start": "node server/server.js"
+  },
+  "engines": {
+    "node": ">=22.5.0"
+  },
+  "dependencies": {
+    "express": "^4.19.2"
+  }
+}

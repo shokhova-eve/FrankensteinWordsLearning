@@ -1,0 +1,36 @@
+@import url('https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400;0,500;0,600;1,400&family=Cormorant+Garamond:wght@500;600;700&family=Courier+Prime:wght@400;700&display=swap');
+
+:root{
+  --paper: #ECE2C9;
+  --paper-dark: #E2D5B0;
+  --ink: #2B2419;
+  --ink-soft: #5A4E3C;
+  --oxblood: #6E2430;
+  --oxblood-dark: #501A22;
+  --verdigris: #4A6558;
+  --verdigris-dark: #374E44;
+  --line: rgba(43,36,25,0.22);
+  --shadow: rgba(43,36,25,0.28);
+}
+
+*{ box-sizing: border-box; }
+
+html,body{
+  margin:0; padding:0;
+  background: var(--paper);
+  background-image:
+    radial-gradient(ellipse at 20% 10%, rgba(255,255,255,0.15), transparent 50%),
+    radial-gradient(ellipse at 80% 90%, rgba(0,0,0,0.05), transparent 50%);
+  color: var(--ink);
+  font-family: 'EB Garamond', serif;
+  font-size: 17px;
+  min-height: 100vh;
+}
+
+::selection{ background: var(--oxblood); color: var(--paper); }
+
+.sheet{
+  max-width: 880px;
+  margin: 0 auto;
+  padding: 28px 20px 80px;
+}
