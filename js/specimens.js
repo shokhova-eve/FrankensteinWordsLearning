@@ -87,11 +87,12 @@ function renderPagination(totalPages){
   if(next) next.addEventListener('click', () => { if(state.currentPage < totalPages){ state.currentPage++; renderSpecimens(); } });
 }
 
-function clearForm(){
-  document.getElementById('f-word').value = '';
-  document.getElementById('f-def').value = '';
-  document.getElementById('f-etym').value = '';
-  document.getElementById('f-ex').value = '';
+function shuffleWords(){
+  const arr = state.words;
+  for(let i = arr.length - 1; i > 0; i--){
+    const j = Math.floor(Math.random() * (i + 1));
+    [arr[i], arr[j]] = [arr[j], arr[i]];
+  }
 }
 
 export function initSpecimens(){
@@ -111,4 +112,9 @@ export function initSpecimens(){
   	renderSpecimens();
   });
 
+  document.getElementById('shuffleWords').addEventListener('click', () => {
+    shuffleWords();
+    state.currentPage = 1;
+    renderSpecimens();
+  });
 }
