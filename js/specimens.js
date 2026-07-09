@@ -111,30 +111,4 @@ export function initSpecimens(){
   	renderSpecimens();
   });
 
-  document.getElementById('showAddForm').addEventListener('click', () => {
-    document.getElementById('addForm').style.display = 'block';
-  });
-  document.getElementById('cancelAdd').addEventListener('click', () => {
-    document.getElementById('addForm').style.display = 'none';
-    clearForm();
-  });
-
-  document.getElementById('saveWord').addEventListener('click', async () => {
-    const word = document.getElementById('f-word').value.trim();
-    const definition = document.getElementById('f-def').value.trim();
-    const etymology = document.getElementById('f-etym').value.trim();
-    const example = document.getElementById('f-ex').value.trim();
-    if(!word || !definition){ alert('Please fill in at least the word and definition.'); return; }
-
-    const created = await api.createWord({ word, definition, etymology, example });
-    state.words.push(created);
-    clearForm();
-    document.getElementById('addForm').style.display = 'none';
-    state.currentFilter = 'all';
-    document.querySelectorAll('.chip').forEach(c => c.classList.remove('active'));
-    document.querySelector('.chip[data-filter="all"]').classList.add('active');
-    state.currentPage = Math.ceil(state.words.length / PAGE_SIZE);
-    renderStats();
-    renderSpecimens();
-  });
 }

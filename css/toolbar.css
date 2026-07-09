@@ -27,7 +27,7 @@
   color: var(--paper);
   border-color: var(--ink);
 }
-.add-btn{
+.shuffle-btn{
   font-family:'Courier Prime', monospace;
   font-size: 12px;
   letter-spacing: 0.5px;
@@ -39,4 +39,5 @@
   cursor: pointer;
   text-transform: uppercase;
 }
-.add-btn:hover{ background: var(--oxblood-dark); }
+.shuffle-btn:hover{ background: var(--oxblood-dark); }
+
