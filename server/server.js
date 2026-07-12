@@ -26,7 +26,13 @@ function serializeWord(row){
 // ---------- Words ----------
 
 app.get('/api/words', (req, res) => {
-  const rows = db.prepare('SELECT * FROM words ORDER BY id').all();
+  const rows = db.prepare('SELECT * FROM words ORDER BY sort_order').all();
+  res.json(rows.map(serializeWord));
+});
+
+app.post('/api/words/shuffle', (req, res) => {
+  db.shuffleWordOrder();
+  const rows = db.prepare('SELECT * FROM words ORDER BY sort_order').all();
   res.json(rows.map(serializeWord));
 });
 

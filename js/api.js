@@ -7,6 +7,7 @@ async function request(url, options){
 
 export const api = {
   getWords: () => request('/api/words'),
+  shuffleWords: () => request('/api/words/shuffle', {method: 'POST'}),
   createWord: (word) => request('/api/words', {
     method: 'POST',
     headers: {'Content-Type': 'application/json'},

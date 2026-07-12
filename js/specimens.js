@@ -87,12 +87,8 @@ function renderPagination(totalPages){
   if(next) next.addEventListener('click', () => { if(state.currentPage < totalPages){ state.currentPage++; renderSpecimens(); } });
 }
 
-function shuffleWords(){
-  const arr = state.words;
-  for(let i = arr.length - 1; i > 0; i--){
-    const j = Math.floor(Math.random() * (i + 1));
-    [arr[i], arr[j]] = [arr[j], arr[i]];
-  }
+async function shuffleWords(){
+  state.words = await api.shuffleWords();
 }
 
 export function initSpecimens(){
@@ -112,8 +108,8 @@ export function initSpecimens(){
   	renderSpecimens();
   });
 
-  document.getElementById('shuffleWords').addEventListener('click', () => {
-    shuffleWords();
+  document.getElementById('shuffleWords').addEventListener('click', async () => {
+    await shuffleWords();
     state.currentPage = 1;
     renderSpecimens();
   });

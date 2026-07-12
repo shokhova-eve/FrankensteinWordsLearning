@@ -50,4 +50,28 @@ if(wordCount === 0){
   }
 }
 
+const hasSortOrder = db.prepare("SELECT 1 FROM pragma_table_info('words') WHERE name = 'sort_order'").get();
+if(!hasSortOrder){
+  db.exec('ALTER TABLE words ADD COLUMN sort_order INTEGER');
+  db.exec('UPDATE words SET sort_order = id');
+}
+
+function shuffleWordOrder(){
+  const ids = db.prepare('SELECT id FROM words').all().map(r => r.id);
+  for(let i = ids.length - 1; i > 0; i--){
+    const j = Math.floor(Math.random() * (i + 1));
+    [ids[i], ids[j]] = [ids[j], ids[i]];
+  }
+  const update = db.prepare('UPDATE words SET sort_order = ? WHERE id = ?');
+  db.exec('BEGIN');
+  try {
+    ids.forEach((id, position) => update.run(position, id));
+    db.exec('COMMIT');
+  } catch(e){
+    db.exec('ROLLBACK');
+    throw e;
+  }
+}
+
 module.exports = db;
+module.exports.shuffleWordOrder = shuffleWordOrder;
