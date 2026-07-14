@@ -1,4 +1,4 @@
-.recite-controls{
+.compose-controls{
 	display:flex;
   	justify-content: space-between;
   	align-items: center;
@@ -6,14 +6,15 @@
   	margin-bottom: 16px;
   	flex-wrap: wrap;
 }
-.timer-group{
+.roll-x-words-group{
 	display:flex;
   	gap: 6px;
 }
-.timer{
+.roll-x-words{
 	background: var(--paper-dark);
 	border: 1px solid var(--line);
   	border-radius: 20px;
+	min-width: 40px;
   	color: var(--ink-soft);
   	cursor: pointer;
 	display: flex;
@@ -23,19 +24,12 @@
 	padding: 4px;
 	gap: 2px;
 }
-.timer-symbol{
-	position: relative;
-	bottom: 1px;
-}
-.timer.active{
+.roll-x-words.active{
   background: var(--oxblood);
   color: var(--paper);
   border-color: var(--ink);
 }
-.start-btn{
-  font-family:'Courier Prime', monospace;
-  font-size: 12px;
-  letter-spacing: 0.5px;
+.edit-btn{
   padding: 8px 16px;
   background: var(--oxblood);
   color: var(--paper);
@@ -44,5 +38,5 @@
   cursor: pointer;
   text-transform: uppercase;
 }
-.start-btn:hover { background: var(--oxblood-dark); }
-.start-btn:disabled { background: var(--oxblood-dark); }
+.edit-btn:hover { background: var(--oxblood-dark); }
+.edit-btn:disabled { background: var(--oxblood-dark); }

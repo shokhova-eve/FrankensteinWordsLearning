@@ -14,6 +14,7 @@
 <link rel="stylesheet" href="css/pagination.css">
 <link rel="stylesheet" href="css/form.css">
 <link rel="stylesheet" href="css/compose.css">
+<link rel="stylesheet" href="css/compose-controls.css">
 <link rel="stylesheet" href="css/entry.css">
 <link rel="stylesheet" href="css/misc.css">
 <link rel="stylesheet" href="css/recite.css">
@@ -58,8 +59,8 @@
   <div class="panel" id="panel-recite">
 	<div class="recite-controls">
 		<div class="timer-group">
-			<button class="timer active" data-seconds="15"><span class="timer-symbol">&#x23F2;</span>15</button>
-			<button class="timer" data-seconds="30"><span class="timer-symbol">&#x23F2;</span>30</button>
+			<button class="timer active" data-seconds="15">⏲️ 15</button>
+			<button class="timer" data-seconds="30">⏲️ 30</button>
     	</div>
 		<button class="start-btn" id="startRecite">Start</button>
 	</div>
@@ -71,14 +72,24 @@
   <!-- COMPOSE PANEL -->
   <div class="panel" id="panel-compose">
     <div class="compose-card">
+	  <div class="compose-controls">
+		<div class="roll-x-words-group">
+			<button class="roll-x-words" data-x-words="1">1</button>
+			<button class="roll-x-words" data-x-words="2">2</button>
+			<button class="roll-x-words" data-x-words="3">3</button>
+			<button class="roll-x-words active" data-x-words="4">4</button>
+			<button class="roll-x-words" data-wildcard="y">+📇 wildcard</button>
+    	</div>
+	  </div>
       <div class="roll-row">
         <div class="roll-words" id="rolledWords">Tap "Roll words" for a random prompt.</div>
         <button class="roll-btn" id="rollBtn">🎲 Roll words</button>
       </div>
-      <input type="text" id="entryTitle" placeholder="Title your entry (optional)">
+      <input type="text" id="entryTitle" maxlength="150" placeholder="Title your entry (optional)">
       <textarea id="entryBody" placeholder="Write a short passage using the rolled words…"></textarea>
       <div class="form-actions" style="margin-top:10px;">
         <button class="add-btn" id="saveEntry">Save entry</button>
+		<span class="word-counter" id="wordCounter">0 words</span>
       </div>
     </div>
     <div id="entryList"><div class="loading">Loading entries…</div></div>

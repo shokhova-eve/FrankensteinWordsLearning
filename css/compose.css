@@ -53,3 +53,19 @@
   cursor: pointer;
 }
 .roll-btn:hover{ background: var(--verdigris-dark); }
+.add-btn{
+  font-family:'Courier Prime', monospace;
+  font-size: 11px;
+  letter-spacing: 0.5px;
+  padding: 6px 12px;
+  background: var(--verdigris);
+  color: var(--paper);
+  border: none;
+  border-radius: 3px;
+  cursor: pointer;
+}
+.word-counter {
+  font-size: 0.85em;
+  color: #888;
+  white-space: nowrap;
+}

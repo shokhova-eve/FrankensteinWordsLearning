@@ -11,6 +11,10 @@ export function renderEntries(){
   }
   el.innerHTML = state.texts.map(t => `
     <div class="entry">
+	  <div class="entry-toolbar>
+	    <span class="word-counter" id="wordCounter">0 words</span>
+	    <button class="edit-btn" id="editBtn">⚡</button>
+	  </div>
       <div class="entry-head">
         <div class="entry-title">${escapeHtml(t.title)}</div>
         <div class="entry-date">${escapeHtml(t.date)}</div>
@@ -31,6 +35,12 @@ export function initCompose(){
     const count = Math.min(4, shuffled.length);
     state.currentRoll = shuffled.slice(0, count).map(w => w.word);
     document.getElementById('rolledWords').innerHTML = 'Use: ' + state.currentRoll.map(w => `<b>${escapeHtml(w)}</b>`).join(', ');
+  });
+
+  document.getElementById('entryBody').addEventListener('input', () => {
+    const text = document.getElementById('entryBody').value.trim();
+    const count = text.length === 0 ? 0 : text.split(/\s+/).length;
+    document.getElementById('wordCounter').textContent = `${count} word${count === 1 ? '' : 's'}`;
   });
 
   document.getElementById('saveEntry').addEventListener('click', async () => {
