@@ -15,7 +15,8 @@ db.exec(`
     etymology   TEXT,
     example     TEXT,
     mastered    INTEGER NOT NULL DEFAULT 0,
-    created_at  TEXT NOT NULL DEFAULT (datetime('now'))
+    created_at  TEXT NOT NULL DEFAULT (datetime('now')),
+    sort_order  INTEGER
   );
 
   CREATE TABLE IF NOT EXISTS texts (
@@ -31,6 +32,24 @@ db.exec(`
     word_id  INTEGER REFERENCES words(id) ON DELETE SET NULL,
     word     TEXT NOT NULL
   );
+`);
+
+// Migration: existing databases created before sort_order existed won't have the column yet.
+const hasSortOrder = db.prepare("SELECT 1 FROM pragma_table_info('words') WHERE name = 'sort_order'").get();
+if(!hasSortOrder){
+  db.exec('ALTER TABLE words ADD COLUMN sort_order INTEGER');
+}
+db.exec('UPDATE words SET sort_order = id WHERE sort_order IS NULL');
+
+// Keeps sort_order populated for future inserts (e.g. via POST /api/words) without
+// requiring server.js to know about it — new words simply start at the end of the order.
+db.exec(`
+  CREATE TRIGGER IF NOT EXISTS words_sort_order_default
+  AFTER INSERT ON words
+  WHEN NEW.sort_order IS NULL
+  BEGIN
+    UPDATE words SET sort_order = NEW.id WHERE id = NEW.id;
+  END;
 `);
 
 const wordCount = db.prepare('SELECT COUNT(*) AS n FROM words').get().n;

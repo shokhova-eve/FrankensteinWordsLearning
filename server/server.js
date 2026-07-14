@@ -26,7 +26,7 @@ function serializeWord(row){
 // ---------- Words ----------
 
 app.get('/api/words', (req, res) => {
-  const rows = db.prepare('SELECT * FROM words ORDER BY id').all();
+  const rows = db.prepare('SELECT * FROM words ORDER BY sort_order, id').all();
   res.json(rows.map(serializeWord));
 });
 
