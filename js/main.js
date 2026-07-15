@@ -4,6 +4,7 @@ import { renderStats } from './stats.js';
 import { initSpecimens, renderSpecimens } from './specimens.js';
 import { initCompose, renderEntries } from './compose.js';
 import { initRecite } from './recite.js';
+import { initSession } from './session.js';
 
 document.querySelectorAll('.tab').forEach(tab => {
   tab.addEventListener('click', () => {
@@ -28,4 +29,5 @@ async function loadData(){
 initSpecimens();
 initCompose();
 initRecite();
+initSession();
 loadData();

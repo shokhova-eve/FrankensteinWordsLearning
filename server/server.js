@@ -1,11 +1,34 @@
 const path = require('node:path');
+const crypto = require('node:crypto');
 const express = require('express');
 const db = require('./db');
+const cookies = require('./cookies');
+const users = require('./users');
+const sessions = require('./sessions');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
+const UID_COOKIE = 'uid';
+const UID_MAX_AGE_SECONDS = 400 * 24 * 60 * 60; // 400 days — the browser-enforced cap
 
 app.use(express.json());
+
+// Resolves the anonymous visitor on every request: reads (or mints) the uid
+// cookie, ensures a users row exists, and attaches the active session so
+// routes can record progress against req.userId / req.sessionId.
+app.use((req, res, next) => {
+  let userId = cookies.parseCookies(req)[UID_COOKIE];
+  if(!userId){
+    userId = crypto.randomUUID();
+    cookies.setCookie(res, UID_COOKIE, userId, { maxAgeSeconds: UID_MAX_AGE_SECONDS });
+  }
+  users.getOrCreateUser(userId);
+  users.touchLastSeen(userId);
+  req.userId = userId;
+  req.sessionId = sessions.getActiveSession(userId);
+  next();
+});
+
 app.use(express.static(path.join(__dirname, '..')));
 
 function formatDate(isoUtc){
@@ -67,6 +90,31 @@ app.get('/api/wildcards', (req, res) => {
   res.json(rows.map(r => ({ id: r.id, word: r.word })));
 });
 
+// ---------- Session (anonymous visitor + progress) ----------
+
+app.get('/api/session', (req, res) => {
+  const user = db.prepare('SELECT name FROM users WHERE id = ?').get(req.userId);
+  res.json({ name: user?.name || null, progress: sessions.getProgress(req.sessionId) });
+});
+
+app.post('/api/session/name', (req, res) => {
+  const { name } = req.body || {};
+  if(!name || !name.trim()) return res.status(400).json({ error: 'name is required' });
+  const updated = users.setName(req.userId, name.trim());
+  res.json({ name: updated.name });
+});
+
+app.post('/api/session/search', (req, res) => {
+  const { query } = req.body || {};
+  sessions.recordSearch(req.sessionId, query);
+  res.status(204).end();
+});
+
+app.post('/api/session/recite', (req, res) => {
+  sessions.recordRecite(req.sessionId);
+  res.status(204).end();
+});
+
 // ---------- Texts (composed practice entries) ----------
 
 app.get('/api/texts', (req, res) => {
@@ -86,7 +134,7 @@ app.post('/api/texts', (req, res) => {
   if(!body){
     return res.status(400).json({ error: 'body is required' });
   }
-  const info = db.prepare('INSERT INTO texts (title, body) VALUES (?, ?)').run(title ?? '', body);
+  const info = db.prepare('INSERT INTO texts (title, body, user_id) VALUES (?, ?, ?)').run(title ?? '', body, req.userId);
   const textId = info.lastInsertRowid;
 
   const findWord = db.prepare('SELECT id FROM words WHERE word = ?');
@@ -95,6 +143,7 @@ app.post('/api/texts', (req, res) => {
     const match = findWord.get(w);
     insertLink.run(textId, match ? match.id : null, w);
   }
+  sessions.recordComposedWords(req.sessionId, (words || []).length);
 
   const row = db.prepare('SELECT * FROM texts WHERE id = ?').get(textId);
   res.status(201).json({

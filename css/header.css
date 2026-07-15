@@ -30,3 +30,30 @@ h1{
   color: var(--ink-soft);
   font-size: 16px;
 }
+.greeting{
+  margin-top: 10px;
+  font-family:'Courier Prime', monospace;
+  font-size: 12px;
+  color: var(--ink-soft);
+  min-height: 20px;
+}
+.greeting-prompt input{
+  font-family:'Courier Prime', monospace;
+  font-size: 12px;
+  background: var(--paper-dark);
+  border: none;
+  border-bottom: 1px solid var(--line);
+  color: var(--ink);
+  padding: 2px 4px;
+  outline: none;
+  width: 120px;
+}
+.greeting-save-btn{
+  font-family:'Courier Prime', monospace;
+  border: 1px solid var(--line);
+  background: var(--paper-dark);
+  color: var(--ink);
+  cursor: pointer;
+  padding: 1px 6px;
+  margin-left: 2px;
+}

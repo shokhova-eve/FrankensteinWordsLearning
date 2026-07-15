@@ -2,6 +2,7 @@ import { state } from './state.js';
 import { api } from './api.js';
 import { escapeHtml } from './utils.js';
 import { renderStats } from './stats.js';
+import { refreshProgress } from './session.js';
 
 function countWords(text){
   const trimmed = text.trim();
@@ -243,6 +244,7 @@ async function saveAllSingleWordEntries(){
   startSingleWordSession();
   renderStats();
   renderEntries();
+  refreshProgress();
 }
 
 function applySingleWordMode(rollCount){
@@ -320,5 +322,6 @@ export function initCompose(){
     document.getElementById('rolledWords').textContent = 'Tap "Roll words" for a random prompt.';
     renderStats();
     renderEntries();
+    refreshProgress();
   });
 }

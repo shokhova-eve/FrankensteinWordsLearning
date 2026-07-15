@@ -2,6 +2,7 @@ import { state } from './state.js';
 import { api } from './api.js';
 import { escapeHtml } from './utils.js';
 import { reciteState } from './reciteState.js';
+import { refreshProgress } from './session.js';
 
 export function initRecite(){
 	document.querySelectorAll('.timer').forEach(timer => {
@@ -57,8 +58,10 @@ function renderReciteSpecimens() {
 }
 
 function advanceCard(wasKnown){
-	if (wasKnown)
+	if (wasKnown){
 		reciteState.reciteClicked += 1;
+		api.recordRecite().then(refreshProgress);
+	}
 	reciteState.reciteCurrentIndex += 1;
 	renderReciteSpecimens();
 }

@@ -9,5 +9,7 @@ export const state = {
   searchQuery: '',
   currentRoll: [],
   rollCount: 4,
-  wildcardActive: false
+  wildcardActive: false,
+  userName: null,
+  progress: { searched: 0, recited: 0, composed: 0, total: 0 }
 };

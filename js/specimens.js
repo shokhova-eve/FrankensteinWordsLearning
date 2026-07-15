@@ -3,6 +3,7 @@ import { api } from './api.js';
 import { escapeHtml } from './utils.js';
 import { renderStats } from './stats.js';
 import { reciteState } from './reciteState.js';
+import { refreshProgress } from './session.js';
 
 function getFiltered(){
   let result = state.words;
@@ -106,10 +107,17 @@ export function initSpecimens(){
     });
   });
 
+  let searchTrackTimer = null;
   document.getElementById('searchInput').addEventListener('input', () => {
-    state.searchQuery = document.getElementById('searchInput').value;
+    const value = document.getElementById('searchInput').value;
+    state.searchQuery = value;
 	state.currentPage = 1;
   	renderSpecimens();
+
+    clearTimeout(searchTrackTimer);
+    searchTrackTimer = setTimeout(() => {
+      if(value.trim().length >= 2) api.recordSearch(value.trim()).then(refreshProgress);
+    }, 500);
   });
 
   document.getElementById('shuffleWords').addEventListener('click', () => {

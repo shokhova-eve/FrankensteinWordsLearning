@@ -38,6 +38,29 @@ db.exec(`
     id    INTEGER PRIMARY KEY AUTOINCREMENT,
     word  TEXT NOT NULL
   );
+
+  CREATE TABLE IF NOT EXISTS users (
+    id            TEXT PRIMARY KEY,
+    name          TEXT,
+    created_at    TEXT NOT NULL DEFAULT (datetime('now')),
+    last_seen_at  TEXT NOT NULL DEFAULT (datetime('now'))
+  );
+
+  CREATE TABLE IF NOT EXISTS sessions (
+    id                  INTEGER PRIMARY KEY AUTOINCREMENT,
+    user_id             TEXT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    started_at          TEXT NOT NULL DEFAULT (datetime('now')),
+    last_activity_at    TEXT NOT NULL DEFAULT (datetime('now')),
+    searched_words      INTEGER NOT NULL DEFAULT 0,
+    recited_recognized  INTEGER NOT NULL DEFAULT 0,
+    composed_words      INTEGER NOT NULL DEFAULT 0
+  );
+
+  CREATE TABLE IF NOT EXISTS session_searches (
+    session_id  INTEGER NOT NULL REFERENCES sessions(id) ON DELETE CASCADE,
+    query       TEXT NOT NULL,
+    PRIMARY KEY (session_id, query)
+  );
 `);
 
 // Migration: existing databases created before sort_order existed won't have the column yet.
@@ -46,6 +69,12 @@ if(!hasSortOrder){
   db.exec('ALTER TABLE words ADD COLUMN sort_order INTEGER');
 }
 db.exec('UPDATE words SET sort_order = id WHERE sort_order IS NULL');
+
+// Migration: attribute composed entries to a user (nullable — older rows predate this column).
+const hasTextsUserId = db.prepare("SELECT 1 FROM pragma_table_info('texts') WHERE name = 'user_id'").get();
+if(!hasTextsUserId){
+  db.exec('ALTER TABLE texts ADD COLUMN user_id TEXT REFERENCES users(id)');
+}
 
 // Keeps sort_order populated for future inserts (e.g. via POST /api/words) without
 // requiring server.js to know about it — new words simply start at the end of the order.

@@ -21,6 +21,19 @@ export const api = {
 
   getWildcards: () => request('/api/wildcards'),
 
+  getSession: () => request('/api/session'),
+  setName: (name) => request('/api/session/name', {
+    method: 'POST',
+    headers: {'Content-Type': 'application/json'},
+    body: JSON.stringify({name})
+  }),
+  recordSearch: (query) => request('/api/session/search', {
+    method: 'POST',
+    headers: {'Content-Type': 'application/json'},
+    body: JSON.stringify({query})
+  }),
+  recordRecite: () => request('/api/session/recite', {method: 'POST'}),
+
   getTexts: () => request('/api/texts'),
   createText: (text) => request('/api/texts', {
     method: 'POST',
