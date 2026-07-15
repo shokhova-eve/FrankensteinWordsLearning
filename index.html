@@ -71,7 +71,7 @@
 
   <!-- COMPOSE PANEL -->
   <div class="panel" id="panel-compose">
-    <div class="compose-card">
+    <div class="compose-card" id="composeCard">
 	  <div class="compose-controls">
 		<div class="roll-x-words-group">
 			<button class="roll-x-words" data-x-words="1">1</button>
@@ -85,11 +85,15 @@
 		<div class="roll-words" id="rolledWords">Tap "Roll words" for a random prompt.</div>
         <button class="roll-btn" id="rollBtn">🎲 Roll words</button>
       </div>
-      <input type="text" id="entryTitle" maxlength="150" placeholder="Title your entry (optional)">
-      <textarea id="entryBody" placeholder="Write a short passage using the rolled words…"></textarea>
-      <div class="form-actions" style="margin-top:10px;   display: flex; align-items: center;">
-        <button class="add-btn" id="saveEntry">Save entry</button>
-		<span class="word-counter" id="wordCounter">0 words</span>
+      <div class="entry-fields" id="entryFields">
+        <input type="text" id="entryTitle" maxlength="150" placeholder="Title your entry (optional)">
+        <textarea id="entryBody" placeholder="Write a short passage using the rolled words…"></textarea>
+        <button class="add-btn" id="saveEntry" title="Save entry">Save entry</button>
+        <span class="word-counter" id="wordCounter">0 words</span>
+      </div>
+      <div class="single-word-block" id="singleWordBlock">
+        <div class="single-word-rows" id="singleWordRows"></div>
+        <button class="add-btn save-all-btn" id="saveAllEntries" title="Save all in one entry">💾 Save all</button>
       </div>
     </div>
     <div id="entryList"><div class="loading">Loading entries…</div></div>

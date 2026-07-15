@@ -86,7 +86,7 @@ app.post('/api/texts', (req, res) => {
   if(!body){
     return res.status(400).json({ error: 'body is required' });
   }
-  const info = db.prepare('INSERT INTO texts (title, body) VALUES (?, ?)').run(title || 'Untitled entry', body);
+  const info = db.prepare('INSERT INTO texts (title, body) VALUES (?, ?)').run(title ?? '', body);
   const textId = info.lastInsertRowid;
 
   const findWord = db.prepare('SELECT id FROM words WHERE word = ?');
@@ -104,6 +104,48 @@ app.post('/api/texts', (req, res) => {
     date: formatDate(row.created_at),
     words: words || []
   });
+});
+
+app.patch('/api/texts/:id', (req, res) => {
+  const id = Number(req.params.id);
+  const existing = db.prepare('SELECT * FROM texts WHERE id = ?').get(id);
+  if(!existing) return res.status(404).json({ error: 'text not found' });
+
+  const { title, body, words } = req.body || {};
+  if(typeof body === 'string' && !body.trim()){
+    return res.status(400).json({ error: 'body is required' });
+  }
+  db.prepare('UPDATE texts SET title = ?, body = ? WHERE id = ?').run(
+    typeof title === 'string' ? title : existing.title,
+    typeof body === 'string' ? body : existing.body,
+    id
+  );
+
+  if(Array.isArray(words)){
+    db.prepare('DELETE FROM text_words WHERE text_id = ?').run(id);
+    const findWord = db.prepare('SELECT id FROM words WHERE word = ?');
+    const insertLink = db.prepare('INSERT INTO text_words (text_id, word_id, word) VALUES (?, ?, ?)');
+    for(const w of words){
+      const match = findWord.get(w);
+      insertLink.run(id, match ? match.id : null, w);
+    }
+  }
+
+  const row = db.prepare('SELECT * FROM texts WHERE id = ?').get(id);
+  const wordRows = db.prepare('SELECT word FROM text_words WHERE text_id = ? ORDER BY id').all(id);
+  res.json({
+    id: row.id,
+    title: row.title,
+    body: row.body,
+    date: formatDate(row.created_at),
+    words: wordRows.map(r => r.word)
+  });
+});
+
+app.delete('/api/texts/:id', (req, res) => {
+  const id = Number(req.params.id);
+  db.prepare('DELETE FROM texts WHERE id = ?').run(id);
+  res.status(204).end();
 });
 
 app.listen(PORT, () => {

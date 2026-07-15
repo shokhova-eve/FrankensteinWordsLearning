@@ -26,5 +26,11 @@ export const api = {
     method: 'POST',
     headers: {'Content-Type': 'application/json'},
     body: JSON.stringify(text)
-  })
+  }),
+  updateText: (id, text) => request(`/api/texts/${id}`, {
+    method: 'PATCH',
+    headers: {'Content-Type': 'application/json'},
+    body: JSON.stringify(text)
+  }),
+  deleteText: (id) => request(`/api/texts/${id}`, {method: 'DELETE'})
 };

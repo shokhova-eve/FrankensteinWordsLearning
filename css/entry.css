@@ -10,6 +10,7 @@
   display:flex; justify-content:space-between; align-items:baseline;
   margin-bottom: 6px; gap: 10px;
 }
+.entry-head.no-title{ justify-content: flex-end; }
 .entry-title{
   font-family:'Cormorant Garamond', serif;
   font-weight: 700;
@@ -23,5 +24,137 @@
 }
 .entry-body{
   line-height: 1.6;
-  white-space: pre-wrap;
 }
+.entry-line{ margin-bottom: 0.2em; }
+.entry-line:last-child{ margin-bottom: 0; }
+.entry-title[data-action="edit"],
+.entry-body[data-action="edit"]{
+  cursor: text;
+}
+
+/* Edit mode: the card background never changes — the only signal that an
+   entry is being edited is the dashed field underlines and the blinking
+   underscore cursor beside the active title/body field. */
+.entry-title-edit-wrap{
+  display: inline-flex;
+  align-items: baseline;
+  gap: 3px;
+}
+.entry-title-input{
+  font-family:'Cormorant Garamond', serif;
+  font-weight: 700;
+  font-size: 19px;
+  border: none;
+  border-bottom: 1px dashed var(--oxblood);
+  background: transparent;
+  color: var(--ink);
+  padding: 0 2px;
+  min-width: 120px;
+}
+.entry-title-input:focus{ outline: none; }
+
+.entry-body-edit-wrap{
+  display: flex;
+  align-items: flex-start;
+  gap: 4px;
+}
+.entry-body-input{
+  flex: 1;
+  min-height: 100px;
+  font-family: 'EB Garamond', serif;
+  font-size: 17px;
+  line-height: 1.6;
+  border: none;
+  border-bottom: 1px dashed var(--line);
+  background: transparent;
+  color: var(--ink);
+  padding: 4px 2px;
+  resize: vertical;
+}
+.entry-body-input:focus{ outline: none; }
+
+.blink-cursor{
+  display: inline-block;
+  color: var(--oxblood);
+  font-weight: 700;
+  animation: entry-cursor-blink 1s steps(1) infinite;
+}
+@keyframes entry-cursor-blink{
+  0%, 49% { opacity: 1; }
+  50%, 100% { opacity: 0; }
+}
+
+.entry-words{
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 8px;
+}
+.entry-word-chip{
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  border: 1px solid var(--line);
+  border-radius: 3px;
+  padding: 2px 6px;
+}
+.entry-word-remove{
+  border: none;
+  background: transparent;
+  color: var(--ink-soft);
+  cursor: pointer;
+  font-size: 13px;
+  line-height: 1;
+  padding: 0;
+}
+.entry-word-remove:hover{ color: var(--oxblood); }
+.entry-word-add{
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+.entry-word-input{
+  font-family:'Courier Prime', monospace;
+  font-size: 12px;
+  border: none;
+  border-bottom: 1px dashed var(--line);
+  background: transparent;
+  color: var(--ink);
+  padding: 2px 4px;
+  width: 90px;
+}
+.entry-word-input:focus{ outline: none; }
+.entry-word-add-btn{
+  border: none;
+  background: var(--verdigris);
+  color: var(--paper);
+  border-radius: 3px;
+  width: 20px;
+  height: 20px;
+  line-height: 1;
+  cursor: pointer;
+  font-size: 13px;
+}
+.entry-word-add-btn:hover{ background: var(--verdigris-dark); }
+
+.entry-footer{
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 6px;
+  margin-top: 10px;
+}
+.entry-word-counter{
+  margin-right: auto;
+}
+.entry-action-btn{
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  font-size: 15px;
+  line-height: 1;
+  padding: 4px 7px;
+  border-radius: 3px;
+}
+.entry-action-btn:hover{ background: rgba(43,36,25,0.08); }
