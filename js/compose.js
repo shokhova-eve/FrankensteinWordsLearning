@@ -26,15 +26,45 @@ export function renderEntries(){
 }
 
 export function initCompose(){
+  document.querySelectorAll('.roll-x-words[data-x-words]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const x = parseInt(btn.dataset.xWords, 10);
+      if(!x) return;
+      state.rollCount = x;
+      document.querySelectorAll('.roll-x-words[data-x-words]').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+    });
+  });
+
+  const wildcardBtn = document.querySelector('[data-wildcard]');
+  if(wildcardBtn){
+    wildcardBtn.addEventListener('click', () => {
+      state.wildcardActive = !state.wildcardActive;
+      wildcardBtn.classList.toggle('active', state.wildcardActive);
+    });
+  }
+
   document.getElementById('rollBtn').addEventListener('click', () => {
     if(state.words.length === 0){
       document.getElementById('rolledWords').textContent = 'Add some specimens first.';
       return;
     }
     const shuffled = [...state.words].sort(() => Math.random() - 0.5);
-    const count = Math.min(4, shuffled.length);
-    state.currentRoll = shuffled.slice(0, count).map(w => w.word);
-    document.getElementById('rolledWords').innerHTML = 'Use: ' + state.currentRoll.map(w => `<b>${escapeHtml(w)}</b>`).join(', ');
+    const count = Math.min(state.rollCount, shuffled.length);
+    const rolled = shuffled.slice(0, count).map(w => w.word);
+
+    const useWildcard = state.wildcardActive && state.wildcards.length > 0;
+    if(useWildcard){
+      const wildcard = state.wildcards[Math.floor(Math.random() * state.wildcards.length)];
+      rolled.push(wildcard.word);
+    }
+
+    state.currentRoll = rolled;
+    document.getElementById('rolledWords').innerHTML = 'Use: ' + rolled.map((w, i) =>
+      (useWildcard && i === rolled.length - 1)
+        ? `<b class="wildcard-word">${escapeHtml(w)}</b>`
+        : `<b>${escapeHtml(w)}</b>`
+    ).join(', ');
   });
 
   document.getElementById('entryBody').addEventListener('input', () => {

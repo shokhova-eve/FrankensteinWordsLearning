@@ -60,6 +60,13 @@ app.delete('/api/words/:id', (req, res) => {
   res.status(204).end();
 });
 
+// ---------- Wildcards ----------
+
+app.get('/api/wildcards', (req, res) => {
+  const rows = db.prepare('SELECT * FROM wildcards ORDER BY id').all();
+  res.json(rows.map(r => ({ id: r.id, word: r.word })));
+});
+
 // ---------- Texts (composed practice entries) ----------
 
 app.get('/api/texts', (req, res) => {

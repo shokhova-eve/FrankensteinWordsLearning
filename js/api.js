@@ -19,6 +19,8 @@ export const api = {
   }),
   deleteWord: (id) => request(`/api/words/${id}`, {method: 'DELETE'}),
 
+  getWildcards: () => request('/api/wildcards'),
+
   getTexts: () => request('/api/texts'),
   createText: (text) => request('/api/texts', {
     method: 'POST',

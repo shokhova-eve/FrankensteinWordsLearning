@@ -41,6 +41,7 @@
   color: var(--verdigris-dark);
 }
 .roll-words b{ color: var(--oxblood); }
+.roll-words b.wildcard-word{ color: var(--verdigris); }
 .roll-btn{
   font-family:'Courier Prime', monospace;
   font-size: 11px;
@@ -65,7 +66,9 @@
   cursor: pointer;
 }
 .word-counter {
+  font-family:'Courier Prime', monospace;
   font-size: 0.85em;
   color: #888;
   white-space: nowrap;
+  margin-left: auto;
 }

@@ -16,9 +16,10 @@ document.querySelectorAll('.tab').forEach(tab => {
 });
 
 async function loadData(){
-  const [words, texts] = await Promise.all([api.getWords(), api.getTexts()]);
+  const [words, texts, wildcards] = await Promise.all([api.getWords(), api.getTexts(), api.getWildcards()]);
   state.words = words;
   state.texts = texts;
+  state.wildcards = wildcards;
   renderStats();
   renderSpecimens();
   renderEntries();

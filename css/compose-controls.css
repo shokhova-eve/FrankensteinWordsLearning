@@ -21,6 +21,7 @@
 	font-family:'Courier Prime', monospace;
 	font-size: 12px;
 	align-items: center;
+	justify-content: center;
 	padding: 4px;
 	gap: 2px;
 }

@@ -1,6 +1,7 @@
 const { DatabaseSync } = require('node:sqlite');
 const path = require('node:path');
 const seedWords = require('./seed-words');
+const seedWildcards = require('./seed-wildcards');
 
 const dbPath = path.join(__dirname, 'vocab.db');
 const db = new DatabaseSync(dbPath);
@@ -32,6 +33,11 @@ db.exec(`
     word_id  INTEGER REFERENCES words(id) ON DELETE SET NULL,
     word     TEXT NOT NULL
   );
+
+  CREATE TABLE IF NOT EXISTS wildcards (
+    id    INTEGER PRIMARY KEY AUTOINCREMENT,
+    word  TEXT NOT NULL
+  );
 `);
 
 // Migration: existing databases created before sort_order existed won't have the column yet.
@@ -61,6 +67,21 @@ if(wordCount === 0){
   try {
     for(const w of seedWords){
       insert.run(w.word, w.definition, w.etymology ?? null, w.example ?? null);
+    }
+    db.exec('COMMIT');
+  } catch(e){
+    db.exec('ROLLBACK');
+    throw e;
+  }
+}
+
+const wildcardCount = db.prepare('SELECT COUNT(*) AS n FROM wildcards').get().n;
+if(wildcardCount === 0){
+  const insertWildcard = db.prepare('INSERT INTO wildcards (word) VALUES (?)');
+  db.exec('BEGIN');
+  try {
+    for(const w of seedWildcards){
+      insertWildcard.run(w);
     }
     db.exec('COMMIT');
   } catch(e){
