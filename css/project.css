@@ -12,22 +12,9 @@
   font-style: italic;
   color: var(--ink-soft);
 }
-.about-note{
-  background: rgba(255,255,255,0.35);
-  border-left: 3px solid var(--verdigris);
-  border-radius: 2px;
-  padding: 16px 20px;
-  margin: 28px 0;
-  font-style: italic;
-  box-shadow: 0 1px 3px var(--shadow);
-}
-.about-note::before{ content: "❝ "; color: var(--oxblood); font-style: normal; }
-.about-note::after{ content: " ❞"; color: var(--oxblood); font-style: normal; }
-.about-note p{ margin: 0; }
-.about-note p + p{ margin-top: 14px; }
 
 .about-source{
-  text-align: center;
+  text-align: left;
   margin-top: 36px;
   padding-top: 26px;
   border-top: 1px solid var(--line);
@@ -52,4 +39,9 @@
 .github-link:hover{
   border-color: var(--oxblood);
   color: var(--oxblood);
+}
+.back-link{
+  color: var(--ink-soft);
+  margin: 6px 0 8px;
+  line-height: 1.5;
 }
