@@ -4,6 +4,7 @@ import { escapeHtml } from './utils.js';
 import { renderStats } from './stats.js';
 import { reciteState } from './reciteState.js';
 import { refreshProgress } from './session.js';
+import { isEditingSpecimen, renderSpecimenEdit, startEditSpecimen, saveEditSpecimen, stopEditingSpecimen, attachSpecimenEditHandlers } from './specimen-edit-mode.js';
 
 function getFiltered(){
   let result = state.words;
@@ -31,7 +32,42 @@ export function renderSpecimens(){
 
   list.innerHTML = pageItems.map((w) => {
     const globalIndex = state.words.findIndex(x => x.id === w.id) + 1;
-    return `
+    return isEditingSpecimen(w.id) ? renderSpecimenEdit(w, globalIndex) : renderSpecimenView(w, globalIndex);
+  }).join('');
+
+  list.querySelectorAll('.specimen').forEach(card => {
+    const id = Number(card.dataset.id);
+
+    card.querySelector('.mastery-cb').addEventListener('change', async (e) => {
+      const w = state.words.find(x => x.id === id);
+      w.mastered = e.target.checked;
+      await api.setMastered(id, w.mastered);
+      renderStats();
+      renderSpecimens();
+    });
+
+    card.querySelector('.edit-btn')?.addEventListener('click', () => {
+      if(isEditingSpecimen(id)) saveEditSpecimen(id);
+      else startEditSpecimen(id);
+    });
+
+    const delBtn = card.querySelector('.del-btn');
+    if(delBtn) delBtn.addEventListener('click', async () => {
+      await api.deleteWord(id);
+      state.words = state.words.filter(x => x.id !== id);
+      stopEditingSpecimen(id);
+      renderStats();
+      renderSpecimens();
+    });
+
+    if(isEditingSpecimen(id)) attachSpecimenEditHandlers(card);
+  });
+
+  renderPagination(totalPages);
+}
+
+function renderSpecimenView(w, globalIndex){
+  return `
     <div class="specimen ${w.mastered ? 'mastered' : ''}" data-id="${w.id}">
       <div class="specimen-head">
         <div>
@@ -46,29 +82,8 @@ export function renderSpecimens(){
       <div class="specimen-def">${escapeHtml(w.definition)}</div>
       ${w.etymology ? `<div class="specimen-etym">${escapeHtml(w.etymology)}</div>` : ''}
       ${w.example ? `<div class="specimen-example">${escapeHtml(w.example)}</div>` : ''}
-      ${state.isAdmin ? `<button class="del-btn">Remove specimen</button>` : ''}
+      ${state.isAdmin ? `<div class="specimen-actions"><button class="edit-btn">Edit specimen</button><span class="specimen-actions-sep">|</span><button class="del-btn">Remove specimen</button></div>` : ''}
     </div>`;
-  }).join('');
-
-  list.querySelectorAll('.specimen').forEach(card => {
-    const id = Number(card.dataset.id);
-    card.querySelector('.mastery-cb').addEventListener('change', async (e) => {
-      const w = state.words.find(x => x.id === id);
-      w.mastered = e.target.checked;
-      await api.setMastered(id, w.mastered);
-      renderStats();
-      renderSpecimens();
-    });
-    const delBtn = card.querySelector('.del-btn');
-    if(delBtn) delBtn.addEventListener('click', async () => {
-      await api.deleteWord(id);
-      state.words = state.words.filter(x => x.id !== id);
-      renderStats();
-      renderSpecimens();
-    });
-  });
-
-  renderPagination(totalPages);
 }
 
 function renderPagination(totalPages){

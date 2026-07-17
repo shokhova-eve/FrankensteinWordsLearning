@@ -92,7 +92,20 @@ app.patch('/api/words/:id', (req, res) => {
       db.prepare('DELETE FROM word_mastery WHERE user_id = ? AND word_id = ?').run(req.userId, id);
     }
   }
-  res.json(serializeWord(existing, getMasteredIds(req.userId)));
+
+  const { word, definition, etymology, example } = req.body || {};
+  if(word !== undefined || definition !== undefined || etymology !== undefined || example !== undefined){
+    if(!users.isAdmin(req.userId)) return res.status(403).json({ error: 'admin only' });
+    if(!word || !definition){
+      return res.status(400).json({ error: 'word and definition are required' });
+    }
+    db.prepare(
+      'UPDATE words SET word = ?, definition = ?, etymology = ?, example = ? WHERE id = ?'
+    ).run(word, definition, etymology || null, example || null, id);
+  }
+
+  const updated = db.prepare('SELECT * FROM words WHERE id = ?').get(id);
+  res.json(serializeWord(updated, getMasteredIds(req.userId)));
 });
 
 app.delete('/api/words/:id', (req, res) => {

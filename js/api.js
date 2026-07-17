@@ -17,6 +17,11 @@ export const api = {
     headers: {'Content-Type': 'application/json'},
     body: JSON.stringify({mastered})
   }),
+  updateWord: (id, word) => request(`/api/words/${id}`, {
+    method: 'PATCH',
+    headers: {'Content-Type': 'application/json'},
+    body: JSON.stringify(word)
+  }),
   deleteWord: (id) => request(`/api/words/${id}`, {method: 'DELETE'}),
 
   getWildcards: () => request('/api/wildcards'),

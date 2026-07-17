@@ -72,10 +72,64 @@
 }
 .specimen-example::before{ content: "❝ "; color: var(--oxblood); }
 .specimen-example::after{ content: " ❞"; color: var(--oxblood); }
-.del-btn{
+.specimen-actions{
+  display:flex;
+  align-items:center;
+  gap:6px;
+  margin-top:8px;
+}
+.specimen-actions-sep{
+  font-size: 10px;
+  color: var(--ink-soft);
+  opacity: 0.5;
+}
+.del-btn, .edit-btn{
   background:none; border:none; color: var(--ink-soft);
   font-family:'Courier Prime', monospace;
   font-size: 10px; letter-spacing: 1px; text-transform: uppercase;
-  cursor:pointer; margin-top:8px; padding:0; opacity:0.6;
+  cursor:pointer; padding:0; opacity:0.6;
 }
 .del-btn:hover{ color: var(--oxblood); opacity:1; }
+.edit-btn:hover{ color: var(--verdigris-dark); opacity:1; }
+
+/* Edit mode: mirrors the composed-entry editing convention (entry.css) —
+   dashed field underlines plus a blinking underscore cursor beside the
+   active field, card background unchanged. */
+.specimen-word-edit-wrap{
+  display: inline-flex;
+  align-items: baseline;
+  gap: 3px;
+}
+.specimen-word-input{
+  font-family:'Cormorant Garamond', serif;
+  font-weight: 700;
+  font-size: 25px;
+  border: none;
+  border-bottom: 1px dashed var(--oxblood);
+  background: transparent;
+  color: var(--ink);
+  padding: 0 2px;
+  min-width: 120px;
+}
+.specimen-word-input:focus{ outline: none; }
+
+.specimen-field-edit-wrap{
+  display: flex;
+  align-items: flex-start;
+  gap: 4px;
+  margin-bottom: 8px;
+}
+.specimen-def-input, .specimen-etym-input, .specimen-example-input{
+  flex: 1;
+  min-height: 44px;
+  font-family: 'EB Garamond', serif;
+  font-size: 15px;
+  line-height: 1.5;
+  border: none;
+  border-bottom: 1px dashed var(--line);
+  background: transparent;
+  color: var(--ink);
+  padding: 4px 2px;
+  resize: vertical;
+}
+.specimen-def-input:focus, .specimen-etym-input:focus, .specimen-example-input:focus{ outline: none; }
