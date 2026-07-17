@@ -17,6 +17,9 @@ header::after{
   gap: 12px;
   margin-bottom: 6px;
 }
+.book-link{
+	color: var(--ink-soft);
+}
 .kicker{
   grid-column: 2;
   justify-self: center;
