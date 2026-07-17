@@ -29,16 +29,33 @@ header::after{
   text-transform: uppercase;
   color: var(--oxblood);
 }
+.project-info{
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 12px;
+  margin-bottom: 6px;
+}
+.project-info-link{
+  font-family:'Courier Prime', monospace;
+  font-size: 12px;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  color: var(--ink-soft);
+  min-height: 14px;
+  white-space: nowrap;
+  text-decoration: none;
+}
+.project-info-link:hover{
+  text-decoration: underline;
+}
 .greeting{
   font-family:'Courier Prime', monospace;
   font-size: 11px;
   letter-spacing: 0.5px;
   color: var(--ink-soft);
   min-height: 14px;
-  text-align: right;
   white-space: nowrap;
-  grid-column: 3;
-  justify-self: end;
 }
 h1{
   font-family:'Cormorant Garamond', serif;

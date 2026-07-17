@@ -1,3 +1,5 @@
+try { process.loadEnvFile(); } catch { /* no .env file present — fine outside dev */ }
+
 const path = require('node:path');
 const crypto = require('node:crypto');
 const express = require('express');
@@ -10,6 +12,7 @@ const app = express();
 const PORT = process.env.PORT || 3000;
 const UID_COOKIE = 'uid';
 const UID_MAX_AGE_SECONDS = 400 * 24 * 60 * 60; // 400 days — the browser-enforced cap
+const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD;
 
 app.use(express.json());
 
@@ -41,22 +44,28 @@ function formatDateOnly(isoDate){
   return new Date(isoDate + 'T00:00:00Z').toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' });
 }
 
-function serializeWord(row){
+function serializeWord(row, masteredIds){
   return {
     id: row.id,
     word: row.word,
     definition: row.definition,
     etymology: row.etymology,
     example: row.example,
-    mastered: !!row.mastered
+    mastered: masteredIds.has(row.id)
   };
+}
+
+function getMasteredIds(userId){
+  const rows = db.prepare('SELECT word_id FROM word_mastery WHERE user_id = ?').all(userId);
+  return new Set(rows.map(r => r.word_id));
 }
 
 // ---------- Words ----------
 
 app.get('/api/words', (req, res) => {
   const rows = db.prepare('SELECT * FROM words ORDER BY sort_order, id').all();
-  res.json(rows.map(serializeWord));
+  const masteredIds = getMasteredIds(req.userId);
+  res.json(rows.map(row => serializeWord(row, masteredIds)));
 });
 
 app.post('/api/words', (req, res) => {
@@ -68,7 +77,7 @@ app.post('/api/words', (req, res) => {
     'INSERT INTO words (word, definition, etymology, example) VALUES (?, ?, ?, ?)'
   ).run(word, definition, etymology || null, example || null);
   const row = db.prepare('SELECT * FROM words WHERE id = ?').get(info.lastInsertRowid);
-  res.status(201).json(serializeWord(row));
+  res.status(201).json(serializeWord(row, getMasteredIds(req.userId)));
 });
 
 app.patch('/api/words/:id', (req, res) => {
@@ -77,13 +86,17 @@ app.patch('/api/words/:id', (req, res) => {
   if(!existing) return res.status(404).json({ error: 'word not found' });
 
   if(typeof req.body?.mastered === 'boolean'){
-    db.prepare('UPDATE words SET mastered = ? WHERE id = ?').run(req.body.mastered ? 1 : 0, id);
+    if(req.body.mastered){
+      db.prepare('INSERT OR IGNORE INTO word_mastery (user_id, word_id) VALUES (?, ?)').run(req.userId, id);
+    } else {
+      db.prepare('DELETE FROM word_mastery WHERE user_id = ? AND word_id = ?').run(req.userId, id);
+    }
   }
-  const row = db.prepare('SELECT * FROM words WHERE id = ?').get(id);
-  res.json(serializeWord(row));
+  res.json(serializeWord(existing, getMasteredIds(req.userId)));
 });
 
 app.delete('/api/words/:id', (req, res) => {
+  if(!users.isAdmin(req.userId)) return res.status(403).json({ error: 'admin only' });
   const id = Number(req.params.id);
   db.prepare('DELETE FROM words WHERE id = ?').run(id);
   res.status(204).end();
@@ -99,15 +112,25 @@ app.get('/api/wildcards', (req, res) => {
 // ---------- Session (anonymous visitor + progress) ----------
 
 app.get('/api/session', (req, res) => {
-  const user = db.prepare('SELECT name FROM users WHERE id = ?').get(req.userId);
-  res.json({ name: user?.name || null, progress: sessions.getProgress(req.sessionId) });
+  const user = db.prepare('SELECT name, is_admin FROM users WHERE id = ?').get(req.userId);
+  res.json({ name: user?.name || null, isAdmin: !!user?.is_admin, progress: sessions.getProgress(req.sessionId) });
 });
 
 app.post('/api/session/name', (req, res) => {
   const { name } = req.body || {};
   if(!name || !name.trim()) return res.status(400).json({ error: 'name is required' });
-  const updated = users.setName(req.userId, name.trim());
-  res.json({ name: updated.name });
+  const trimmed = name.trim();
+
+  // The name field doubles as the admin-mode gate: matching the configured
+  // password flips the flag instead of overwriting the visible name, so the
+  // password is never saved or displayed.
+  if(ADMIN_PASSWORD && trimmed === ADMIN_PASSWORD){
+    const updated = users.setAdmin(req.userId, true);
+    return res.json({ name: updated.name, isAdmin: true });
+  }
+
+  const updated = users.setName(req.userId, trimmed);
+  res.json({ name: updated.name, isAdmin: !!updated.is_admin });
 });
 
 app.post('/api/session/search', (req, res) => {
@@ -158,7 +181,8 @@ app.get('/api/texts', (req, res) => {
     title: t.title,
     body: t.body,
     date: formatDate(t.created_at),
-    words: wordsStmt.all(t.id).map(r => r.word)
+    words: wordsStmt.all(t.id).map(r => r.word),
+    mine: t.user_id === req.userId
   })));
 });
 
@@ -184,7 +208,8 @@ app.post('/api/texts', (req, res) => {
     title: row.title,
     body: row.body,
     date: formatDate(row.created_at),
-    words: words || []
+    words: words || [],
+    mine: true
   });
 });
 

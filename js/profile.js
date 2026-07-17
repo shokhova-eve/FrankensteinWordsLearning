@@ -33,8 +33,11 @@ function initNameForm(name){
   const save = async () => {
     const value = input.value.trim();
     if(!value) return;
-    const { name: saved } = await api.setName(value);
-    document.getElementById('profileGreeting').textContent = `Greetings, ${saved}`;
+    const { name: saved, isAdmin } = await api.setName(value);
+    input.value = saved || '';
+    document.getElementById('profileGreeting').textContent = isAdmin
+      ? `Greetings, ${saved} — admin mode enabled`
+      : `Greetings, ${saved}`;
   };
 
   document.getElementById('nameSaveBtn').addEventListener('click', save);

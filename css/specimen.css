@@ -36,7 +36,7 @@
 .mastery-toggle{
   display:flex;
   align-items:center;
-  gap: 6px;
+  gap: 3px;
   font-family:'Courier Prime', monospace;
   font-size: 10px;
   letter-spacing: 1px;

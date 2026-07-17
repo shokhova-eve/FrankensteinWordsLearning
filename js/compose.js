@@ -1,88 +1,47 @@
 import { state } from './state.js';
 import { api } from './api.js';
-import { escapeHtml } from './utils.js';
+import { escapeHtml, countWords } from './utils.js';
 import { renderStats } from './stats.js';
 import { refreshProgress } from './session.js';
 import { applySingleWordMode, startSingleWordSession, saveAllSingleWordEntries } from './compose-sentences.js';
-
-function countWords(text){
-  const trimmed = text.trim();
-  return trimmed === '' ? 0 : trimmed.split(/\s+/).length;
-}
-
-// --- Entry editing ---
-// Only one entry can be in edit mode at a time. `entryDraft` holds the
-// in-progress edits so nothing is written back until "save" is pressed.
-let editingEntryId = null;
-let entryDraft = null; // { title, body, words: [] }
+import { isEditingEntry, renderEntryEdit, startEditEntry, saveEditEntry, stopEditingEntry, attachEntryEditHandlers } from './compose-edit-mode.js';
 
 function renderEntry(t){
-  const isEditing = editingEntryId === t.id;
-  const words = isEditing ? entryDraft.words : (t.words || []);
-  const bodyText = isEditing ? entryDraft.body : t.body;
-  const titleText = isEditing ? entryDraft.title : (t.title || '');
+  return isEditingEntry(t.id) ? renderEntryEdit(t) : renderEntryView(t);
+}
+
+function renderEntryView(t){
+  const words = t.words || [];
+  const bodyText = t.body;
+  const titleText = t.title || '';
   const count = countWords(bodyText);
 
   return `
-    <div class="entry${isEditing ? ' editing' : ''}" data-id="${t.id}">
-      <div class="entry-head${!isEditing && !titleText ? ' no-title' : ''}">
-        ${isEditing
-          ? `<span class="entry-title-edit-wrap"><input type="text" class="entry-title-input" maxlength="150" placeholder="Title your entry (optional)" value="${escapeHtml(titleText)}"><span class="blink-cursor">_</span></span>`
-          : (titleText ? `<div class="entry-title" data-action="edit">${escapeHtml(titleText)}</div>` : '')}
+    <div class="entry" data-id="${t.id}">
+      <div class="entry-head${!titleText ? ' no-title' : ''}">
+        ${titleText ? `<div class="entry-title" data-action="edit">${escapeHtml(titleText)}</div>` : ''}
         <div class="entry-date">${escapeHtml(t.date)}</div>
       </div>
-      ${(words.length || isEditing) ? `
+      ${words.length ? `
         <div class="roll-words entry-words">
           Words:
-          ${words.map((w, i) => isEditing
-            ? `<span class="entry-word-chip"><b>${escapeHtml(w)}</b><button class="entry-word-remove" data-word-index="${i}" title="Remove word">&times;</button></span>`
-            : `<b>${escapeHtml(w)}</b>`
-          ).join(isEditing ? '' : ', ')}
-          ${isEditing ? `<span class="entry-word-add"><input type="text" class="entry-word-input" placeholder="add word…"><button class="entry-word-add-btn" title="Add word">+</button></span>` : ''}
+          ${words.map(w => `<b>${escapeHtml(w)}</b>`).join(', ')}
         </div>` : ''}
-      ${isEditing
-        ? `<span class="entry-body-edit-wrap"><textarea class="entry-body-input">${escapeHtml(bodyText)}</textarea><span class="blink-cursor">_</span></span>`
-        : `<div class="entry-body" data-action="edit">${bodyText.split('\n').map(line => `<div class="entry-line">${escapeHtml(line)}</div>`).join('')}</div>`}
+      <div class="entry-body" data-action="edit">${bodyText.split('\n').map(line => `<div class="entry-line">${escapeHtml(line)}</div>`).join('')}</div>
       <div class="entry-footer">
         <span class="word-counter entry-word-counter">${count} word${count === 1 ? '' : 's'}</span>
-        <button class="entry-action-btn entry-edit-btn" title="${isEditing ? 'Save entry' : 'Edit entry'}">${isEditing ? '💾' : '⚡'}</button>
+        <button class="entry-action-btn entry-edit-btn" title="Edit entry">⚡</button>
         <button class="entry-action-btn entry-delete-btn" title="Delete entry">🗑️</button>
       </div>
     </div>
   `;
 }
 
-function startEditEntry(id){
-  const entry = state.texts.find(t => t.id === id);
-  if(!entry) return;
-  editingEntryId = id;
-  entryDraft = { title: entry.title || '', body: entry.body, words: [...(entry.words || [])] };
-  renderEntries();
-}
-
-async function saveEditEntry(id){
-  const entry = state.texts.find(t => t.id === id);
-  if(!entry || !entryDraft) return;
-  const body = entryDraft.body.trim();
-  if(!body){ alert('Entry cannot be empty.'); return; }
-
-  const updated = await api.updateText(id, {
-    title: entryDraft.title.trim(),
-    body,
-    words: entryDraft.words
-  });
-  Object.assign(entry, updated);
-  editingEntryId = null;
-  entryDraft = null;
-  renderStats();
-  renderEntries();
-}
-
 async function deleteEntry(id){
   if(!confirm('Delete this entry?')) return;
   await api.deleteText(id);
   state.texts = state.texts.filter(t => t.id !== id);
-  if(editingEntryId === id){ editingEntryId = null; entryDraft = null; }
+  stopEditingEntry(id);
   renderStats();
   renderEntries();
 }
@@ -96,43 +55,13 @@ function attachEntryHandlers(){
     });
 
     entryEl.querySelector('.entry-edit-btn')?.addEventListener('click', () => {
-      if(editingEntryId === id) saveEditEntry(id);
+      if(isEditingEntry(id)) saveEditEntry(id);
       else startEditEntry(id);
     });
 
     entryEl.querySelector('.entry-delete-btn')?.addEventListener('click', () => deleteEntry(id));
 
-    if(editingEntryId !== id) return;
-
-    const titleInput = entryEl.querySelector('.entry-title-input');
-    const bodyInput = entryEl.querySelector('.entry-body-input');
-    const counter = entryEl.querySelector('.entry-word-counter');
-
-    titleInput?.addEventListener('input', () => { entryDraft.title = titleInput.value; });
-    bodyInput?.addEventListener('input', () => {
-      entryDraft.body = bodyInput.value;
-      const c = countWords(bodyInput.value);
-      counter.textContent = `${c} word${c === 1 ? '' : 's'}`;
-    });
-
-    entryEl.querySelectorAll('.entry-word-remove').forEach(btn => {
-      btn.addEventListener('click', () => {
-        entryDraft.words.splice(Number(btn.dataset.wordIndex), 1);
-        renderEntries();
-      });
-    });
-
-    const addInput = entryEl.querySelector('.entry-word-input');
-    const addWord = () => {
-      const val = addInput.value.trim();
-      if(!val) return;
-      entryDraft.words.push(val);
-      renderEntries();
-    };
-    entryEl.querySelector('.entry-word-add-btn')?.addEventListener('click', addWord);
-    addInput?.addEventListener('keydown', (e) => {
-      if(e.key === 'Enter'){ e.preventDefault(); addWord(); }
-    });
+    if(isEditingEntry(id)) attachEntryEditHandlers(entryEl);
   });
 }
 

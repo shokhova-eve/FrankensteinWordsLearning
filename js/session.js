@@ -2,6 +2,7 @@ import { state } from './state.js';
 import { api } from './api.js';
 import { escapeHtml } from './utils.js';
 import { renderStats } from './stats.js';
+import { renderSpecimens } from './specimens.js';
 
 function renderGreeting(){
   const el = document.getElementById('greeting');
@@ -18,9 +19,11 @@ export async function refreshProgress(){
 }
 
 export async function initSession(){
-  const { name, progress } = await api.getSession();
+  const { name, isAdmin, progress } = await api.getSession();
   state.userName = name;
+  state.isAdmin = isAdmin;
   state.progress = progress;
   renderGreeting();
   renderStats();
+  renderSpecimens();
 }

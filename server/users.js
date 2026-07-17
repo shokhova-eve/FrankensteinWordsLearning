@@ -29,6 +29,16 @@ function setName(id, name){
   return db.prepare('SELECT * FROM users WHERE id = ?').get(id);
 }
 
+function isAdmin(id){
+  const row = db.prepare('SELECT is_admin FROM users WHERE id = ?').get(id);
+  return !!row?.is_admin;
+}
+
+function setAdmin(id, value){
+  db.prepare('UPDATE users SET is_admin = ? WHERE id = ?').run(value ? 1 : 0, id);
+  return db.prepare('SELECT * FROM users WHERE id = ?').get(id);
+}
+
 // One-time cleanup for rows created before pseudonyms existed.
 function backfillMissingNames(){
   const rows = db.prepare('SELECT id FROM users WHERE name IS NULL').all();
@@ -36,4 +46,4 @@ function backfillMissingNames(){
   for(const row of rows) update.run(randomPseudonym(), row.id);
 }
 
-module.exports = { getOrCreateUser, touchLastSeen, setName, backfillMissingNames };
+module.exports = { getOrCreateUser, touchLastSeen, setName, backfillMissingNames, isAdmin, setAdmin };

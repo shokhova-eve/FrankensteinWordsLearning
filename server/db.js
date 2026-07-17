@@ -6,6 +6,12 @@ const seedWildcards = require('./seed-wildcards');
 const dbPath = path.join(__dirname, 'vocab.db');
 const db = new DatabaseSync(dbPath);
 
+// Checked before the CREATE TABLE below so we know whether word_mastery is
+// brand new (and therefore needs backfilling from the old global column).
+const hadWordMastery = db.prepare(
+  "SELECT 1 FROM sqlite_master WHERE type = 'table' AND name = 'word_mastery'"
+).get();
+
 db.exec(`
   PRAGMA foreign_keys = ON;
 
@@ -37,6 +43,15 @@ db.exec(`
   CREATE TABLE IF NOT EXISTS wildcards (
     id    INTEGER PRIMARY KEY AUTOINCREMENT,
     word  TEXT NOT NULL
+  );
+
+  -- Per-user mastery: a row's presence means that user has mastered that
+  -- word. Replaces the old global words.mastered column, which made a word
+  -- marked mastered by one visitor show as mastered for every visitor.
+  CREATE TABLE IF NOT EXISTS word_mastery (
+    user_id  TEXT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    word_id  INTEGER NOT NULL REFERENCES words(id) ON DELETE CASCADE,
+    PRIMARY KEY (user_id, word_id)
   );
 
   CREATE TABLE IF NOT EXISTS users (
@@ -74,6 +89,36 @@ db.exec('UPDATE words SET sort_order = id WHERE sort_order IS NULL');
 const hasTextsUserId = db.prepare("SELECT 1 FROM pragma_table_info('texts') WHERE name = 'user_id'").get();
 if(!hasTextsUserId){
   db.exec('ALTER TABLE texts ADD COLUMN user_id TEXT REFERENCES users(id)');
+}
+
+// Migration: per-visitor admin flag, granted by entering ADMIN_PASSWORD in the name field.
+const hasIsAdmin = db.prepare("SELECT 1 FROM pragma_table_info('users') WHERE name = 'is_admin'").get();
+if(!hasIsAdmin){
+  db.exec('ALTER TABLE users ADD COLUMN is_admin INTEGER NOT NULL DEFAULT 0');
+}
+
+// One-time backfill for word_mastery: carry over the old global mastered
+// flags so existing visitors don't lose progress they already made. Users
+// created after this point start with no mastered words, since they never
+// had rows in the old shared column.
+if(!hadWordMastery){
+  const masteredWordIds = db.prepare('SELECT id FROM words WHERE mastered = 1').all();
+  const existingUserIds = db.prepare('SELECT id FROM users').all();
+  if(masteredWordIds.length && existingUserIds.length){
+    const insertMastery = db.prepare('INSERT OR IGNORE INTO word_mastery (user_id, word_id) VALUES (?, ?)');
+    db.exec('BEGIN');
+    try {
+      for(const user of existingUserIds){
+        for(const word of masteredWordIds){
+          insertMastery.run(user.id, word.id);
+        }
+      }
+      db.exec('COMMIT');
+    } catch(e){
+      db.exec('ROLLBACK');
+      throw e;
+    }
+  }
 }
 
 // Keeps sort_order populated for future inserts (e.g. via POST /api/words) without

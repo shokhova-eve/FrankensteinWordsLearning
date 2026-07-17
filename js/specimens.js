@@ -39,14 +39,14 @@ export function renderSpecimens(){
           <div class="specimen-word">${escapeHtml(w.word)}</div>
         </div>
         <label class="mastery-toggle">
+		  ${w.mastered ? 'Mastered' : 'Learning'}
           <input type="checkbox" class="mastery-cb" ${w.mastered ? 'checked' : ''}>
-          ${w.mastered ? 'Mastered' : 'Learning'}
         </label>
       </div>
       <div class="specimen-def">${escapeHtml(w.definition)}</div>
       ${w.etymology ? `<div class="specimen-etym">${escapeHtml(w.etymology)}</div>` : ''}
       ${w.example ? `<div class="specimen-example">${escapeHtml(w.example)}</div>` : ''}
-      <button class="del-btn">Remove specimen</button>
+      ${state.isAdmin ? `<button class="del-btn">Remove specimen</button>` : ''}
     </div>`;
   }).join('');
 
@@ -59,7 +59,8 @@ export function renderSpecimens(){
       renderStats();
       renderSpecimens();
     });
-    card.querySelector('.del-btn').addEventListener('click', async () => {
+    const delBtn = card.querySelector('.del-btn');
+    if(delBtn) delBtn.addEventListener('click', async () => {
       await api.deleteWord(id);
       state.words = state.words.filter(x => x.id !== id);
       renderStats();

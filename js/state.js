@@ -11,5 +11,6 @@ export const state = {
   rollCount: 4,
   wildcardActive: false,
   userName: null,
+  isAdmin: false,
   progress: { searched: 0, recited: 0, composed: 0, total: 0 }
 };
