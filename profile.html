@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Visitor's Log — Specimen Journal</title>
+<link rel="stylesheet" href="css/base.css">
+<link rel="stylesheet" href="css/header.css">
+<link rel="stylesheet" href="css/profile.css">
+</head>
+<body>
+<div class="sheet">
+
+  <header>
+    <div class="header-top">
+      <div class="kicker">Laboratory Notebook · Est. Dec. 11th, 17—</div>
+      <a class="greeting-link" href="index.html">&larr; Back to journal</a>
+    </div>
+    <h1>Visitor's Log</h1>
+    <div class="subtitle" id="profileGreeting"></div>
+  </header>
+
+  <div class="name-form">
+    <label for="nameInput">Your name:</label>
+    <input type="text" id="nameInput" maxlength="60" placeholder="your name">
+    <button class="name-save-btn" id="nameSaveBtn">Save</button>
+  </div>
+
+  <table class="profile-table">
+    <thead>
+      <tr><th>Date</th><th>Time spent</th><th>Searched</th><th>Recited</th><th>Composed</th></tr>
+    </thead>
+    <tbody id="profileTableBody"><tr><td colspan="5" class="empty-row">Loading…</td></tr></tbody>
+  </table>
+
+</div>
+
+<script type="module" src="js/profile.js"></script>
+</body>
+</html>

@@ -10,13 +10,19 @@ header::after{
   position:absolute; left:0; right:0; bottom:-6px;
   height:1px; background: var(--ink); opacity:0.5;
 }
+.header-top{
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 12px;
+  margin-bottom: 6px;
+}
 .kicker{
   font-family:'Courier Prime', monospace;
   font-size: 11px;
   letter-spacing: 3px;
   text-transform: uppercase;
   color: var(--oxblood);
-  margin-bottom: 6px;
 }
 h1{
   font-family:'Cormorant Garamond', serif;
@@ -31,29 +37,20 @@ h1{
   font-size: 16px;
 }
 .greeting{
-  margin-top: 10px;
   font-family:'Courier Prime', monospace;
-  font-size: 12px;
+  font-size: 11px;
+  letter-spacing: 0.5px;
   color: var(--ink-soft);
-  min-height: 20px;
+  min-height: 14px;
+  text-align: right;
+  white-space: nowrap;
 }
-.greeting-prompt input{
-  font-family:'Courier Prime', monospace;
-  font-size: 12px;
-  background: var(--paper-dark);
-  border: none;
-  border-bottom: 1px solid var(--line);
-  color: var(--ink);
-  padding: 2px 4px;
-  outline: none;
-  width: 120px;
+.greeting-link{
+  color: var(--ink-soft);
+  text-decoration: none;
+  border-bottom: 1px dotted var(--ink-soft);
 }
-.greeting-save-btn{
-  font-family:'Courier Prime', monospace;
-  border: 1px solid var(--line);
-  background: var(--paper-dark);
-  color: var(--ink);
-  cursor: pointer;
-  padding: 1px 6px;
-  margin-left: 2px;
+.greeting-link:hover{
+  color: var(--oxblood);
+  border-bottom-color: var(--oxblood);
 }

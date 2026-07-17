@@ -13,6 +13,8 @@ const UID_MAX_AGE_SECONDS = 400 * 24 * 60 * 60; // 400 days — the browser-enfo
 
 app.use(express.json());
 
+users.backfillMissingNames();
+
 // Resolves the anonymous visitor on every request: reads (or mints) the uid
 // cookie, ensures a users row exists, and attaches the active session so
 // routes can record progress against req.userId / req.sessionId.
@@ -33,6 +35,10 @@ app.use(express.static(path.join(__dirname, '..')));
 
 function formatDate(isoUtc){
   return new Date(isoUtc + 'Z').toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' });
+}
+
+function formatDateOnly(isoDate){
+  return new Date(isoDate + 'T00:00:00Z').toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' });
 }
 
 function serializeWord(row){
@@ -113,6 +119,33 @@ app.post('/api/session/search', (req, res) => {
 app.post('/api/session/recite', (req, res) => {
   sessions.recordRecite(req.sessionId);
   res.status(204).end();
+});
+
+app.get('/api/profile', (req, res) => {
+  const user = db.prepare('SELECT name FROM users WHERE id = ?').get(req.userId);
+  const days = db.prepare(`
+    SELECT
+      date(started_at) AS day,
+      SUM((julianday(last_activity_at) - julianday(started_at)) * 24 * 60) AS minutes,
+      SUM(searched_words) AS searched,
+      SUM(recited_recognized) AS recited,
+      SUM(composed_words) AS composed
+    FROM sessions
+    WHERE user_id = ?
+    GROUP BY day
+    ORDER BY day DESC
+  `).all(req.userId);
+
+  res.json({
+    name: user?.name || null,
+    days: days.map(d => ({
+      date: formatDateOnly(d.day),
+      minutes: Math.round(d.minutes),
+      searched: d.searched,
+      recited: d.recited,
+      composed: d.composed
+    }))
+  });
 });
 
 // ---------- Texts (composed practice entries) ----------

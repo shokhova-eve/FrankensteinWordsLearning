@@ -22,6 +22,7 @@ export const api = {
   getWildcards: () => request('/api/wildcards'),
 
   getSession: () => request('/api/session'),
+  getProfile: () => request('/api/profile'),
   setName: (name) => request('/api/session/name', {
     method: 'POST',
     headers: {'Content-Type': 'application/json'},

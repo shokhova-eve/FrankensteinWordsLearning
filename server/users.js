@@ -1,9 +1,22 @@
 const db = require('./db');
 
+// Assigned automatically so a visitor never has to type anything to get a
+// clickable "Greetings, ___" — they can still replace it with their own name
+// later from the profile page (setName below).
+const PSEUDONYMS = [
+  'Seeker of Knowledge',
+  'Wretched Wanderer',
+  'Spark of Being'
+];
+
+function randomPseudonym(){
+  return PSEUDONYMS[Math.floor(Math.random() * PSEUDONYMS.length)];
+}
+
 function getOrCreateUser(id){
   const existing = db.prepare('SELECT * FROM users WHERE id = ?').get(id);
   if(existing) return existing;
-  db.prepare('INSERT INTO users (id) VALUES (?)').run(id);
+  db.prepare('INSERT INTO users (id, name) VALUES (?, ?)').run(id, randomPseudonym());
   return db.prepare('SELECT * FROM users WHERE id = ?').get(id);
 }
 
@@ -16,4 +29,11 @@ function setName(id, name){
   return db.prepare('SELECT * FROM users WHERE id = ?').get(id);
 }
 
-module.exports = { getOrCreateUser, touchLastSeen, setName };
+// One-time cleanup for rows created before pseudonyms existed.
+function backfillMissingNames(){
+  const rows = db.prepare('SELECT id FROM users WHERE name IS NULL').all();
+  const update = db.prepare('UPDATE users SET name = ? WHERE id = ?');
+  for(const row of rows) update.run(randomPseudonym(), row.id);
+}
+
+module.exports = { getOrCreateUser, touchLastSeen, setName, backfillMissingNames };
