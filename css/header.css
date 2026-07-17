@@ -11,18 +11,31 @@ header::after{
   height:1px; background: var(--ink); opacity:0.5;
 }
 .header-top{
-  display: flex;
-  justify-content: space-between;
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
   align-items: baseline;
   gap: 12px;
   margin-bottom: 6px;
 }
 .kicker{
+  grid-column: 2;
+  justify-self: center;
   font-family:'Courier Prime', monospace;
   font-size: 11px;
   letter-spacing: 3px;
   text-transform: uppercase;
   color: var(--oxblood);
+}
+.greeting{
+  font-family:'Courier Prime', monospace;
+  font-size: 11px;
+  letter-spacing: 0.5px;
+  color: var(--ink-soft);
+  min-height: 14px;
+  text-align: right;
+  white-space: nowrap;
+  grid-column: 3;
+  justify-self: end;
 }
 h1{
   font-family:'Cormorant Garamond', serif;
@@ -35,15 +48,6 @@ h1{
   font-style: italic;
   color: var(--ink-soft);
   font-size: 16px;
-}
-.greeting{
-  font-family:'Courier Prime', monospace;
-  font-size: 11px;
-  letter-spacing: 0.5px;
-  color: var(--ink-soft);
-  min-height: 14px;
-  text-align: right;
-  white-space: nowrap;
 }
 .greeting-link{
   color: var(--ink-soft);
