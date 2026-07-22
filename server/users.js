@@ -1,4 +1,4 @@
-const db = require('./db');
+const db = require('./app-db');
 
 // Assigned automatically so a visitor never has to type anything to get a
 // clickable "Greetings, ___" — they can still replace it with their own name

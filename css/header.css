@@ -78,3 +78,23 @@ h1{
   color: var(--oxblood);
   border-bottom-color: var(--oxblood);
 }
+.greeting--login-prompt{
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  white-space: normal;
+}
+.login-as-btn{
+  font-family: 'Courier Prime', monospace;
+  font-size: 11px;
+  letter-spacing: 0.5px;
+  color: var(--oxblood);
+  background: none;
+  border: 1px dotted var(--oxblood);
+  padding: 1px 6px;
+  cursor: pointer;
+}
+.login-as-btn:hover{
+  background: var(--oxblood);
+  color: var(--paper);
+}

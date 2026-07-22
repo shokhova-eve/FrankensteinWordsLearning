@@ -1,4 +1,4 @@
-const db = require('./db');
+const db = require('./app-db');
 
 // A session is one continuous burst of activity. Any tracked action extends
 // it; once the gap since the last one exceeds this, the next action starts

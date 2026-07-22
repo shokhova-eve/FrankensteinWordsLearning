@@ -1,13 +1,33 @@
 import { state } from './state.js';
 import { api } from './api.js';
-import { escapeHtml } from './utils.js';
+import { escapeHtml, getPreferredName, setPreferredName } from './utils.js';
 import { renderStats } from './stats.js';
 import { renderSpecimens } from './specimens.js';
 
 function renderGreeting(){
   const el = document.getElementById('greeting');
   if(!el || !state.userName) return;
+  el.classList.remove('greeting--login-prompt');
   el.innerHTML = `<a class="greeting-link" href="profile.html">Greetings, ${escapeHtml(state.userName)}</a>`;
+}
+
+// If this browser previously chose a name but the server just handed back
+// something else (a fresh pseudonym), offer to restore it in one click
+// instead of making the visitor retype it on the profile page.
+function renderLoginAsPrompt(preferredName){
+  const el = document.getElementById('greeting');
+  if(!el) return;
+  el.classList.add('greeting--login-prompt');
+  el.innerHTML = `
+    <a class="greeting-link" href="profile.html">Greetings, ${escapeHtml(state.userName)}</a>
+    <button type="button" class="login-as-btn" id="loginAsBtn">Login as ${escapeHtml(preferredName)}?</button>
+  `;
+  document.getElementById('loginAsBtn').addEventListener('click', async () => {
+    const { name, isAdmin } = await api.setName(preferredName);
+    state.userName = name;
+    state.isAdmin = isAdmin;
+    renderGreeting();
+  });
 }
 
 // Shared by any module that just recorded a tracked action (search, recite,
@@ -23,7 +43,15 @@ export async function initSession(){
   state.userName = name;
   state.isAdmin = isAdmin;
   state.progress = progress;
-  renderGreeting();
+
+  const preferredName = getPreferredName();
+  if(preferredName && preferredName !== name){
+    renderLoginAsPrompt(preferredName);
+  } else {
+    if(name) setPreferredName(name);
+    renderGreeting();
+  }
+
   renderStats();
   renderSpecimens();
 }

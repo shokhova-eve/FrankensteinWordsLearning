@@ -1,3 +1,4 @@
 /backup
 /notes
 .env
+server/app-data.db*

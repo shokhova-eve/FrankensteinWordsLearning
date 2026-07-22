@@ -4,6 +4,7 @@ const path = require('node:path');
 const crypto = require('node:crypto');
 const express = require('express');
 const db = require('./db');
+const appDb = require('./app-db');
 const cookies = require('./cookies');
 const users = require('./users');
 const sessions = require('./sessions');
@@ -56,7 +57,7 @@ function serializeWord(row, masteredIds){
 }
 
 function getMasteredIds(userId){
-  const rows = db.prepare('SELECT word_id FROM word_mastery WHERE user_id = ?').all(userId);
+  const rows = appDb.prepare('SELECT word_id FROM word_mastery WHERE user_id = ?').all(userId);
   return new Set(rows.map(r => r.word_id));
 }
 
@@ -87,9 +88,9 @@ app.patch('/api/words/:id', (req, res) => {
 
   if(typeof req.body?.mastered === 'boolean'){
     if(req.body.mastered){
-      db.prepare('INSERT OR IGNORE INTO word_mastery (user_id, word_id) VALUES (?, ?)').run(req.userId, id);
+      appDb.prepare('INSERT OR IGNORE INTO word_mastery (user_id, word_id) VALUES (?, ?)').run(req.userId, id);
     } else {
-      db.prepare('DELETE FROM word_mastery WHERE user_id = ? AND word_id = ?').run(req.userId, id);
+      appDb.prepare('DELETE FROM word_mastery WHERE user_id = ? AND word_id = ?').run(req.userId, id);
     }
   }
 
@@ -111,6 +112,11 @@ app.patch('/api/words/:id', (req, res) => {
 app.delete('/api/words/:id', (req, res) => {
   if(!users.isAdmin(req.userId)) return res.status(403).json({ error: 'admin only' });
   const id = Number(req.params.id);
+  // word_mastery/text_words live in app-db.js's separate database file, so
+  // the FK cascade/SET NULL that used to clean these up automatically no
+  // longer applies across files — done by hand here instead.
+  appDb.prepare('DELETE FROM word_mastery WHERE word_id = ?').run(id);
+  appDb.prepare('UPDATE text_words SET word_id = NULL WHERE word_id = ?').run(id);
   db.prepare('DELETE FROM words WHERE id = ?').run(id);
   res.status(204).end();
 });
@@ -125,7 +131,7 @@ app.get('/api/wildcards', (req, res) => {
 // ---------- Session (anonymous visitor + progress) ----------
 
 app.get('/api/session', (req, res) => {
-  const user = db.prepare('SELECT name, is_admin FROM users WHERE id = ?').get(req.userId);
+  const user = appDb.prepare('SELECT name, is_admin FROM users WHERE id = ?').get(req.userId);
   res.json({ name: user?.name || null, isAdmin: !!user?.is_admin, progress: sessions.getProgress(req.sessionId) });
 });
 
@@ -158,8 +164,8 @@ app.post('/api/session/recite', (req, res) => {
 });
 
 app.get('/api/profile', (req, res) => {
-  const user = db.prepare('SELECT name FROM users WHERE id = ?').get(req.userId);
-  const days = db.prepare(`
+  const user = appDb.prepare('SELECT name FROM users WHERE id = ?').get(req.userId);
+  const days = appDb.prepare(`
     SELECT
       date(started_at) AS day,
       SUM((julianday(last_activity_at) - julianday(started_at)) * 24 * 60) AS minutes,
@@ -187,8 +193,8 @@ app.get('/api/profile', (req, res) => {
 // ---------- Texts (composed practice entries) ----------
 
 app.get('/api/texts', (req, res) => {
-  const texts = db.prepare('SELECT * FROM texts ORDER BY id DESC').all();
-  const wordsStmt = db.prepare('SELECT word FROM text_words WHERE text_id = ? ORDER BY id');
+  const texts = appDb.prepare('SELECT * FROM texts ORDER BY id DESC').all();
+  const wordsStmt = appDb.prepare('SELECT word FROM text_words WHERE text_id = ? ORDER BY id');
   res.json(texts.map(t => ({
     id: t.id,
     title: t.title,
@@ -204,18 +210,18 @@ app.post('/api/texts', (req, res) => {
   if(!body){
     return res.status(400).json({ error: 'body is required' });
   }
-  const info = db.prepare('INSERT INTO texts (title, body, user_id) VALUES (?, ?, ?)').run(title ?? '', body, req.userId);
+  const info = appDb.prepare('INSERT INTO texts (title, body, user_id) VALUES (?, ?, ?)').run(title ?? '', body, req.userId);
   const textId = info.lastInsertRowid;
 
   const findWord = db.prepare('SELECT id FROM words WHERE word = ?');
-  const insertLink = db.prepare('INSERT INTO text_words (text_id, word_id, word) VALUES (?, ?, ?)');
+  const insertLink = appDb.prepare('INSERT INTO text_words (text_id, word_id, word) VALUES (?, ?, ?)');
   for(const w of (words || [])){
     const match = findWord.get(w);
     insertLink.run(textId, match ? match.id : null, w);
   }
   sessions.recordComposedWords(req.sessionId, (words || []).length);
 
-  const row = db.prepare('SELECT * FROM texts WHERE id = ?').get(textId);
+  const row = appDb.prepare('SELECT * FROM texts WHERE id = ?').get(textId);
   res.status(201).json({
     id: row.id,
     title: row.title,
@@ -228,31 +234,31 @@ app.post('/api/texts', (req, res) => {
 
 app.patch('/api/texts/:id', (req, res) => {
   const id = Number(req.params.id);
-  const existing = db.prepare('SELECT * FROM texts WHERE id = ?').get(id);
+  const existing = appDb.prepare('SELECT * FROM texts WHERE id = ?').get(id);
   if(!existing) return res.status(404).json({ error: 'text not found' });
 
   const { title, body, words } = req.body || {};
   if(typeof body === 'string' && !body.trim()){
     return res.status(400).json({ error: 'body is required' });
   }
-  db.prepare('UPDATE texts SET title = ?, body = ? WHERE id = ?').run(
+  appDb.prepare('UPDATE texts SET title = ?, body = ? WHERE id = ?').run(
     typeof title === 'string' ? title : existing.title,
     typeof body === 'string' ? body : existing.body,
     id
   );
 
   if(Array.isArray(words)){
-    db.prepare('DELETE FROM text_words WHERE text_id = ?').run(id);
+    appDb.prepare('DELETE FROM text_words WHERE text_id = ?').run(id);
     const findWord = db.prepare('SELECT id FROM words WHERE word = ?');
-    const insertLink = db.prepare('INSERT INTO text_words (text_id, word_id, word) VALUES (?, ?, ?)');
+    const insertLink = appDb.prepare('INSERT INTO text_words (text_id, word_id, word) VALUES (?, ?, ?)');
     for(const w of words){
       const match = findWord.get(w);
       insertLink.run(id, match ? match.id : null, w);
     }
   }
 
-  const row = db.prepare('SELECT * FROM texts WHERE id = ?').get(id);
-  const wordRows = db.prepare('SELECT word FROM text_words WHERE text_id = ? ORDER BY id').all(id);
+  const row = appDb.prepare('SELECT * FROM texts WHERE id = ?').get(id);
+  const wordRows = appDb.prepare('SELECT word FROM text_words WHERE text_id = ? ORDER BY id').all(id);
   res.json({
     id: row.id,
     title: row.title,
@@ -264,7 +270,7 @@ app.patch('/api/texts/:id', (req, res) => {
 
 app.delete('/api/texts/:id', (req, res) => {
   const id = Number(req.params.id);
-  db.prepare('DELETE FROM texts WHERE id = ?').run(id);
+  appDb.prepare('DELETE FROM texts WHERE id = ?').run(id);
   res.status(204).end();
 });
 

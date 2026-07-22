@@ -1,5 +1,5 @@
 import { api } from './api.js';
-import { escapeHtml } from './utils.js';
+import { escapeHtml, setPreferredName } from './utils.js';
 
 function formatMinutes(minutes){
   if(minutes < 1) return '<1 min';
@@ -34,6 +34,7 @@ function initNameForm(name){
     const value = input.value.trim();
     if(!value) return;
     const { name: saved, isAdmin } = await api.setName(value);
+    if(saved) setPreferredName(saved);
     input.value = saved || '';
     document.getElementById('profileGreeting').textContent = isAdmin
       ? `Greetings, ${saved} — admin mode enabled`
