@@ -39,6 +39,17 @@ function setAdmin(id, value){
   return db.prepare('SELECT * FROM users WHERE id = ?').get(id);
 }
 
+// Used by the "Login as X" recovery flow: if exactly one *other* user has
+// this exact name, treat it as the same visitor returning (e.g. after a
+// cleared cookie) and hand back their id so the caller can adopt it. Auto
+// pseudonyms are excluded — they're drawn from a 3-item pool and would
+// collide constantly, unlike a name someone deliberately chose for themselves.
+function findOtherUserByName(currentId, name){
+  if(PSEUDONYMS.includes(name)) return null;
+  const matches = db.prepare('SELECT id FROM users WHERE name = ? AND id != ?').all(name, currentId);
+  return matches.length === 1 ? matches[0].id : null;
+}
+
 // One-time cleanup for rows created before pseudonyms existed.
 function backfillMissingNames(){
   const rows = db.prepare('SELECT id FROM users WHERE name IS NULL').all();
@@ -46,4 +57,4 @@ function backfillMissingNames(){
   for(const row of rows) update.run(randomPseudonym(), row.id);
 }
 
-module.exports = { getOrCreateUser, touchLastSeen, setName, backfillMissingNames, isAdmin, setAdmin };
+module.exports = { getOrCreateUser, touchLastSeen, setName, backfillMissingNames, isAdmin, setAdmin, findOtherUserByName };

@@ -152,6 +152,27 @@ app.post('/api/session/name', (req, res) => {
   res.json({ name: updated.name, isAdmin: !!updated.is_admin });
 });
 
+// "Login as X" recovery: unlike plain rename above, this adopts an existing
+// visitor's identity outright (by pointing this browser's cookie at their
+// user id) when the remembered name unambiguously matches one other user —
+// restoring their actual progress/mastery, not just relabeling a fresh one.
+app.post('/api/session/login-as', (req, res) => {
+  const { name } = req.body || {};
+  if(!name || !name.trim()) return res.status(400).json({ error: 'name is required' });
+  const trimmed = name.trim();
+
+  const targetId = users.findOtherUserByName(req.userId, trimmed);
+  if(!targetId){
+    const updated = users.setName(req.userId, trimmed);
+    return res.json({ name: updated.name, isAdmin: !!updated.is_admin, adopted: false });
+  }
+
+  cookies.setCookie(res, UID_COOKIE, targetId, { maxAgeSeconds: UID_MAX_AGE_SECONDS });
+  users.touchLastSeen(targetId);
+  const target = appDb.prepare('SELECT name, is_admin FROM users WHERE id = ?').get(targetId);
+  res.json({ name: target.name, isAdmin: !!target.is_admin, adopted: true });
+});
+
 app.post('/api/session/search', (req, res) => {
   const { query } = req.body || {};
   sessions.recordSearch(req.sessionId, query);

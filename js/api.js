@@ -33,6 +33,11 @@ export const api = {
     headers: {'Content-Type': 'application/json'},
     body: JSON.stringify({name})
   }),
+  loginAs: (name) => request('/api/session/login-as', {
+    method: 'POST',
+    headers: {'Content-Type': 'application/json'},
+    body: JSON.stringify({name})
+  }),
   recordSearch: (query) => request('/api/session/search', {
     method: 'POST',
     headers: {'Content-Type': 'application/json'},

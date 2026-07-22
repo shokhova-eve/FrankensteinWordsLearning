@@ -1,6 +1,6 @@
 import { state } from './state.js';
 import { api } from './api.js';
-import { escapeHtml, getPreferredName, setPreferredName } from './utils.js';
+import { escapeHtml, getPreferredName } from './utils.js';
 import { renderStats } from './stats.js';
 import { renderSpecimens } from './specimens.js';
 
@@ -23,10 +23,12 @@ function renderLoginAsPrompt(preferredName){
     <button type="button" class="login-as-btn" id="loginAsBtn">Login as ${escapeHtml(preferredName)}?</button>
   `;
   document.getElementById('loginAsBtn').addEventListener('click', async () => {
-    const { name, isAdmin } = await api.setName(preferredName);
-    state.userName = name;
-    state.isAdmin = isAdmin;
-    renderGreeting();
+    // A full reload is simplest here — adopting a different identity changes
+    // mastered-word flags, stats, and composed texts throughout the app, not
+    // just the greeting, so every module needs to re-fetch against the newly
+    // adopted user id.
+    await api.loginAs(preferredName);
+    window.location.reload();
   });
 }
 
@@ -48,7 +50,6 @@ export async function initSession(){
   if(preferredName && preferredName !== name){
     renderLoginAsPrompt(preferredName);
   } else {
-    if(name) setPreferredName(name);
     renderGreeting();
   }
 
